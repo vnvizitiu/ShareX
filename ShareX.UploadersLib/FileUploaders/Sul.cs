@@ -27,11 +27,33 @@
 
 using Newtonsoft.Json.Linq;
 using ShareX.HelpersLib;
+using ShareX.UploadersLib.Properties;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
+using System.Windows.Forms;
 
 namespace ShareX.UploadersLib.FileUploaders
 {
+    public class SulFileUploaderService : FileUploaderService
+    {
+        public override FileDestination EnumValue { get; } = FileDestination.Sul;
+
+        public override Image ServiceImage => Resources.Sul;
+
+        public override bool CheckConfig(UploadersConfig config)
+        {
+            return !string.IsNullOrEmpty(config.SulAPIKey);
+        }
+
+        public override GenericUploader CreateUploader(UploadersConfig config, TaskReferenceHelper taskInfo)
+        {
+            return new SulUploader(config.SulAPIKey);
+        }
+
+        public override TabPage GetUploadersConfigTabPage(UploadersConfigForm form) => form.tpSul;
+    }
+
     public sealed class SulUploader : FileUploader
     {
         private string APIKey { get; set; }

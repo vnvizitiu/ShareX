@@ -34,8 +34,7 @@ namespace ShareX
     {
         public VideoEncoder encoder { get; private set; }
 
-        public EncoderProgramForm()
-            : this(new VideoEncoder())
+        public EncoderProgramForm() : this(new VideoEncoder())
         {
         }
 
@@ -75,11 +74,13 @@ namespace ShareX
             encoder.OutputExtension = txtExtension.Text;
 
             DialogResult = DialogResult.OK;
+            Close();
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.Cancel;
+            Close();
         }
     }
 }

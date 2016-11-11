@@ -24,6 +24,7 @@
 #endregion License Information (GPL v3)
 
 using ShareX.HelpersLib.Properties;
+using System;
 using System.Windows.Forms;
 
 namespace ShareX.HelpersLib
@@ -89,28 +90,20 @@ namespace ShareX.HelpersLib
 
         protected override bool ShowWithoutActivation => !ActivateWindow;
 
-        private void UpdateMessageBox_Shown(object sender, System.EventArgs e)
+        private void UpdateMessageBox_Shown(object sender, EventArgs e)
         {
             if (ActivateWindow)
             {
-                this.ShowActivate();
+                this.ForceActivate();
             }
         }
 
-        private void UpdateMessageBox_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (e.CloseReason == CloseReason.UserClosing)
-            {
-                DialogResult = DialogResult.No;
-            }
-        }
-
-        private void cbDontShow_CheckedChanged(object sender, System.EventArgs e)
+        private void cbDontShow_CheckedChanged(object sender, EventArgs e)
         {
             DontShow = cbDontShow.Checked;
         }
 
-        private void lblViewChangelog_Click(object sender, System.EventArgs e)
+        private void lblViewChangelog_Click(object sender, EventArgs e)
         {
             URLHelpers.OpenURL(Links.URL_CHANGELOG);
         }
@@ -118,11 +111,13 @@ namespace ShareX.HelpersLib
         private void btnYes_MouseClick(object sender, MouseEventArgs e)
         {
             DialogResult = DialogResult.Yes;
+            Close();
         }
 
         private void btnNo_MouseClick(object sender, MouseEventArgs e)
         {
             DialogResult = DialogResult.No;
+            Close();
         }
     }
 }

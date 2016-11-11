@@ -74,6 +74,7 @@ namespace ShareX
         TextUpload,
         ShortenURL,
         ShareURL,
+        Download,
         DownloadUpload
     }
 
@@ -104,9 +105,10 @@ namespace ShareX
         CopyFileToClipboard = 1 << 10,
         CopyFilePathToClipboard = 1 << 11,
         ShowInExplorer = 1 << 12,
-        ShowBeforeUploadWindow = 1 << 13,
-        UploadImageToHost = 1 << 14,
-        DeleteFile = 1 << 15
+        DoOCR = 1 << 13,
+        ShowBeforeUploadWindow = 1 << 14,
+        UploadImageToHost = 1 << 15,
+        DeleteFile = 1 << 16
     }
 
     [Flags]
@@ -123,14 +125,12 @@ namespace ShareX
 
     public enum CaptureType
     {
-        Screen,
+        Fullscreen,
         Monitor,
         ActiveMonitor,
         Window,
         ActiveWindow,
-        Rectangle,
-        Polygon,
-        Freehand,
+        Region,
         CustomRegion,
         LastRegion
     }
@@ -139,6 +139,7 @@ namespace ShareX
     {
         Region,
         ActiveWindow,
+        CustomRegion,
         LastRegion
     }
 
@@ -159,24 +160,25 @@ namespace ShareX
         ActiveWindow,
         ActiveMonitor,
         RectangleRegion,
-        RectangleAnnotate,
         RectangleLight,
         RectangleTransparent,
-        PolygonRegion,
-        FreeHandRegion,
         CustomRegion,
         LastRegion,
         ScrollingCapture,
         CaptureWebpage,
+        TextCapture,
         AutoCapture,
         StartAutoCapture,
         // Screen record
         ScreenRecorder,
         ScreenRecorderActiveWindow,
+        ScreenRecorderCustomRegion,
         StartScreenRecorder,
         ScreenRecorderGIF,
         ScreenRecorderGIFActiveWindow,
+        ScreenRecorderGIFCustomRegion,
         StartScreenRecorderGIF,
+        AbortScreenRecording,
         // Tools
         ColorPicker,
         ScreenColorPicker,
@@ -195,8 +197,10 @@ namespace ShareX
         MonitorTest,
         // Other
         DisableHotkeys,
+        OpenMainWindow,
         OpenScreenshotsFolder,
-        OpenHistory
+        OpenHistory,
+        OpenImageHistory
     }
 
     public enum HotkeyStatus

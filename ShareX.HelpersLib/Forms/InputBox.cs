@@ -47,7 +47,7 @@ namespace ShareX.HelpersLib
 
         private void InputBox_Shown(object sender, EventArgs e)
         {
-            this.ShowActivate();
+            this.ForceActivate();
 
             txtInputText.SelectionLength = txtInputText.Text.Length;
         }
@@ -55,12 +55,15 @@ namespace ShareX.HelpersLib
         private void btnOK_Click(object sender, EventArgs e)
         {
             InputText = txtInputText.Text;
+
             DialogResult = DialogResult.OK;
+            Close();
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.Cancel;
+            Close();
         }
 
         public static string GetInputText(string title = null, string inputText = null)
@@ -121,6 +124,7 @@ namespace ShareX.HelpersLib
             this.AcceptButton = this.btnOK;
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.SystemColors.Window;
             this.Controls.Add(this.txtInputText);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);

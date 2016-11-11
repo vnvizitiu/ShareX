@@ -121,14 +121,185 @@
   <data name="tcSettings.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
     <value>Top, Bottom, Left, Right</value>
   </data>
+  <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="cbCheckPreReleaseUpdates.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="cbCheckPreReleaseUpdates.Location" type="System.Drawing.Point, System.Drawing">
+    <value>16, 328</value>
+  </data>
+  <data name="cbCheckPreReleaseUpdates.Size" type="System.Drawing.Size, System.Drawing">
+    <value>168, 17</value>
+  </data>
+  <data name="cbCheckPreReleaseUpdates.TabIndex" type="System.Int32, mscorlib">
+    <value>16</value>
+  </data>
+  <data name="cbCheckPreReleaseUpdates.Text" xml:space="preserve">
+    <value>Check for pre-release updates</value>
+  </data>
+  <data name="&gt;&gt;cbCheckPreReleaseUpdates.Name" xml:space="preserve">
+    <value>cbCheckPreReleaseUpdates</value>
+  </data>
+  <data name="&gt;&gt;cbCheckPreReleaseUpdates.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;cbCheckPreReleaseUpdates.Parent" xml:space="preserve">
+    <value>tpGeneral</value>
+  </data>
+  <data name="&gt;&gt;cbCheckPreReleaseUpdates.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="cbTrayMiddleClickAction.Location" type="System.Drawing.Point, System.Drawing">
+    <value>248, 260</value>
+  </data>
+  <data name="cbTrayMiddleClickAction.Size" type="System.Drawing.Size, System.Drawing">
+    <value>288, 21</value>
+  </data>
+  <data name="cbTrayMiddleClickAction.TabIndex" type="System.Int32, mscorlib">
+    <value>15</value>
+  </data>
+  <data name="&gt;&gt;cbTrayMiddleClickAction.Name" xml:space="preserve">
+    <value>cbTrayMiddleClickAction</value>
+  </data>
+  <data name="&gt;&gt;cbTrayMiddleClickAction.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;cbTrayMiddleClickAction.Parent" xml:space="preserve">
+    <value>tpGeneral</value>
+  </data>
+  <data name="&gt;&gt;cbTrayMiddleClickAction.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="lblTrayMiddleClickAction.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="lblTrayMiddleClickAction.Location" type="System.Drawing.Point, System.Drawing">
+    <value>13, 264</value>
+  </data>
+  <data name="lblTrayMiddleClickAction.Size" type="System.Drawing.Size, System.Drawing">
+    <value>125, 13</value>
+  </data>
+  <data name="lblTrayMiddleClickAction.TabIndex" type="System.Int32, mscorlib">
+    <value>12</value>
+  </data>
+  <data name="lblTrayMiddleClickAction.Text" xml:space="preserve">
+    <value>On tray icon middle click:</value>
+  </data>
+  <data name="&gt;&gt;lblTrayMiddleClickAction.Name" xml:space="preserve">
+    <value>lblTrayMiddleClickAction</value>
+  </data>
+  <data name="&gt;&gt;lblTrayMiddleClickAction.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lblTrayMiddleClickAction.Parent" xml:space="preserve">
+    <value>tpGeneral</value>
+  </data>
+  <data name="&gt;&gt;lblTrayMiddleClickAction.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="cbTrayLeftDoubleClickAction.Location" type="System.Drawing.Point, System.Drawing">
+    <value>248, 236</value>
+  </data>
+  <data name="cbTrayLeftDoubleClickAction.Size" type="System.Drawing.Size, System.Drawing">
+    <value>288, 21</value>
+  </data>
+  <data name="cbTrayLeftDoubleClickAction.TabIndex" type="System.Int32, mscorlib">
+    <value>14</value>
+  </data>
+  <data name="&gt;&gt;cbTrayLeftDoubleClickAction.Name" xml:space="preserve">
+    <value>cbTrayLeftDoubleClickAction</value>
+  </data>
+  <data name="&gt;&gt;cbTrayLeftDoubleClickAction.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;cbTrayLeftDoubleClickAction.Parent" xml:space="preserve">
+    <value>tpGeneral</value>
+  </data>
+  <data name="&gt;&gt;cbTrayLeftDoubleClickAction.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="lblTrayLeftDoubleClickAction.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="lblTrayLeftDoubleClickAction.Location" type="System.Drawing.Point, System.Drawing">
+    <value>13, 240</value>
+  </data>
+  <data name="lblTrayLeftDoubleClickAction.Size" type="System.Drawing.Size, System.Drawing">
+    <value>144, 13</value>
+  </data>
+  <data name="lblTrayLeftDoubleClickAction.TabIndex" type="System.Int32, mscorlib">
+    <value>11</value>
+  </data>
+  <data name="lblTrayLeftDoubleClickAction.Text" xml:space="preserve">
+    <value>On tray icon double left click:</value>
+  </data>
+  <data name="&gt;&gt;lblTrayLeftDoubleClickAction.Name" xml:space="preserve">
+    <value>lblTrayLeftDoubleClickAction</value>
+  </data>
+  <data name="&gt;&gt;lblTrayLeftDoubleClickAction.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lblTrayLeftDoubleClickAction.Parent" xml:space="preserve">
+    <value>tpGeneral</value>
+  </data>
+  <data name="&gt;&gt;lblTrayLeftDoubleClickAction.ZOrder" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="cbTrayLeftClickAction.Location" type="System.Drawing.Point, System.Drawing">
+    <value>248, 212</value>
+  </data>
+  <data name="cbTrayLeftClickAction.Size" type="System.Drawing.Size, System.Drawing">
+    <value>288, 21</value>
+  </data>
+  <data name="cbTrayLeftClickAction.TabIndex" type="System.Int32, mscorlib">
+    <value>13</value>
+  </data>
+  <data name="&gt;&gt;cbTrayLeftClickAction.Name" xml:space="preserve">
+    <value>cbTrayLeftClickAction</value>
+  </data>
+  <data name="&gt;&gt;cbTrayLeftClickAction.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;cbTrayLeftClickAction.Parent" xml:space="preserve">
+    <value>tpGeneral</value>
+  </data>
+  <data name="&gt;&gt;cbTrayLeftClickAction.ZOrder" xml:space="preserve">
+    <value>5</value>
+  </data>
+  <data name="lblTrayLeftClickAction.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="lblTrayLeftClickAction.Location" type="System.Drawing.Point, System.Drawing">
+    <value>13, 216</value>
+  </data>
+  <data name="lblTrayLeftClickAction.Size" type="System.Drawing.Size, System.Drawing">
+    <value>109, 13</value>
+  </data>
+  <data name="lblTrayLeftClickAction.TabIndex" type="System.Int32, mscorlib">
+    <value>10</value>
+  </data>
+  <data name="lblTrayLeftClickAction.Text" xml:space="preserve">
+    <value>On tray icon left click:</value>
+  </data>
+  <data name="&gt;&gt;lblTrayLeftClickAction.Name" xml:space="preserve">
+    <value>lblTrayLeftClickAction</value>
+  </data>
+  <data name="&gt;&gt;lblTrayLeftClickAction.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lblTrayLeftClickAction.Parent" xml:space="preserve">
+    <value>tpGeneral</value>
+  </data>
+  <data name="&gt;&gt;lblTrayLeftClickAction.ZOrder" xml:space="preserve">
+    <value>6</value>
+  </data>
   <data name="btnEditQuickTaskMenu.Location" type="System.Drawing.Point, System.Drawing">
-    <value>16, 208</value>
+    <value>16, 296</value>
   </data>
   <data name="btnEditQuickTaskMenu.Size" type="System.Drawing.Size, System.Drawing">
     <value>288, 23</value>
   </data>
-  <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="btnEditQuickTaskMenu.TabIndex" type="System.Int32, mscorlib">
     <value>9</value>
   </data>
@@ -145,7 +316,7 @@
     <value>tpGeneral</value>
   </data>
   <data name="&gt;&gt;btnEditQuickTaskMenu.ZOrder" xml:space="preserve">
-    <value>0</value>
+    <value>7</value>
   </data>
   <data name="cbShowTray.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -175,7 +346,7 @@
     <value>tpGeneral</value>
   </data>
   <data name="&gt;&gt;cbShowTray.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>8</value>
   </data>
   <data name="cbTrayIconProgressEnabled.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -205,7 +376,7 @@
     <value>tpGeneral</value>
   </data>
   <data name="&gt;&gt;cbTrayIconProgressEnabled.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>9</value>
   </data>
   <data name="btnLanguages.ImageAlign" type="System.Drawing.ContentAlignment, System.Drawing">
     <value>MiddleLeft</value>
@@ -250,7 +421,7 @@
     <value>tpGeneral</value>
   </data>
   <data name="&gt;&gt;btnLanguages.ZOrder" xml:space="preserve">
-    <value>3</value>
+    <value>10</value>
   </data>
   <data name="cbRememberMainFormPosition.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -280,37 +451,7 @@
     <value>tpGeneral</value>
   </data>
   <data name="&gt;&gt;cbRememberMainFormPosition.ZOrder" xml:space="preserve">
-    <value>4</value>
-  </data>
-  <data name="llTranslators.AutoSize" type="System.Boolean, mscorlib">
-    <value>True</value>
-  </data>
-  <data name="llTranslators.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
-    <value>NoControl</value>
-  </data>
-  <data name="llTranslators.Location" type="System.Drawing.Point, System.Drawing">
-    <value>248, 37</value>
-  </data>
-  <data name="llTranslators.Size" type="System.Drawing.Size, System.Drawing">
-    <value>209, 13</value>
-  </data>
-  <data name="llTranslators.TabIndex" type="System.Int32, mscorlib">
-    <value>2</value>
-  </data>
-  <data name="llTranslators.Text" xml:space="preserve">
-    <value>Help us translate ShareX to your language!</value>
-  </data>
-  <data name="&gt;&gt;llTranslators.Name" xml:space="preserve">
-    <value>llTranslators</value>
-  </data>
-  <data name="&gt;&gt;llTranslators.Type" xml:space="preserve">
-    <value>System.Windows.Forms.LinkLabel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;llTranslators.Parent" xml:space="preserve">
-    <value>tpGeneral</value>
-  </data>
-  <data name="&gt;&gt;llTranslators.ZOrder" xml:space="preserve">
-    <value>5</value>
+    <value>11</value>
   </data>
   <data name="cbSilentRun.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -340,7 +481,7 @@
     <value>tpGeneral</value>
   </data>
   <data name="&gt;&gt;cbSilentRun.ZOrder" xml:space="preserve">
-    <value>6</value>
+    <value>12</value>
   </data>
   <data name="cbTaskbarProgressEnabled.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -370,7 +511,7 @@
     <value>tpGeneral</value>
   </data>
   <data name="&gt;&gt;cbTaskbarProgressEnabled.ZOrder" xml:space="preserve">
-    <value>7</value>
+    <value>13</value>
   </data>
   <data name="cbRememberMainFormSize.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -400,7 +541,7 @@
     <value>tpGeneral</value>
   </data>
   <data name="&gt;&gt;cbRememberMainFormSize.ZOrder" xml:space="preserve">
-    <value>8</value>
+    <value>14</value>
   </data>
   <data name="lblLanguage.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -430,7 +571,7 @@
     <value>tpGeneral</value>
   </data>
   <data name="&gt;&gt;lblLanguage.ZOrder" xml:space="preserve">
-    <value>9</value>
+    <value>15</value>
   </data>
   <data name="tpGeneral.Location" type="System.Drawing.Point, System.Drawing">
     <value>4, 22</value>
@@ -773,7 +914,7 @@
   </data>
   <data name="lblPreviewPersonalFolderPath.Text" xml:space="preserve">
     <value>...</value>
-  <comment>@Invariant</comment></data>
+  </data>
   <data name="&gt;&gt;lblPreviewPersonalFolderPath.Name" xml:space="preserve">
     <value>lblPreviewPersonalFolderPath</value>
   </data>
@@ -1016,7 +1157,7 @@
   </data>
   <data name="lblSaveImageSubFolderPatternPreview.Text" xml:space="preserve">
     <value>...</value>
-  <comment>@Invariant</comment></data>
+  </data>
   <data name="&gt;&gt;lblSaveImageSubFolderPatternPreview.Name" xml:space="preserve">
     <value>lblSaveImageSubFolderPatternPreview</value>
   </data>

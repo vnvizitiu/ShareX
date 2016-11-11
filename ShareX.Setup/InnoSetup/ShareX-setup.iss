@@ -25,6 +25,7 @@ ArchitecturesInstallIn64BitMode=x64 ia64
 DefaultDirName={pf}\{#AppName}
 DefaultGroupName={#AppName}
 DirExistsWarning=no
+DisableReadyPage=yes
 DisableProgramGroupPage=yes
 LicenseFile={#RootDirectory}\LICENSE.txt
 MinVersion=0,5.01.2600
@@ -37,7 +38,6 @@ UninstallDisplayName={#AppName}
 VersionInfoCompany={#AppPublisher}
 VersionInfoTextVersion={#AppVersion}
 VersionInfoVersion={#AppVersion}
-WizardImageBackColor=clWhite
 WizardImageFile=WizardImageFile.bmp
 WizardImageStretch=no
 WizardSmallImageFile=WizardSmallImageFile.bmp
@@ -59,7 +59,7 @@ Source: "{#AppParentDirectory}\ShareX.exe.config"; DestDir: {app}; Flags: ignore
 Source: "{#AppParentDirectory}\*.dll"; DestDir: {app}; Flags: ignoreversion
 Source: "{#RootDirectory}\Licenses\*.txt"; DestDir: {app}\Licenses; Flags: ignoreversion
 Source: "Output\Recorder-devices-setup.exe"; DestDir: {app}; Flags: ignoreversion
-Source: "{#RootDirectory}\..\ShareX_Chrome\ShareX_Chrome\bin\Release\ShareX_Chrome.exe"; DestDir: {app}; Flags: ignoreversion
+Source: "{#RootDirectory}\ShareX.Chrome\bin\Release\ShareX_Chrome.exe"; DestDir: {app}; Flags: ignoreversion
 Source: "{#AppParentDirectory}\de\*.resources.dll"; DestDir: {app}\Languages\de; Flags: ignoreversion
 Source: "{#AppParentDirectory}\es\*.resources.dll"; DestDir: {app}\Languages\es; Flags: ignoreversion
 Source: "{#AppParentDirectory}\fr\*.resources.dll"; DestDir: {app}\Languages\fr; Flags: ignoreversion
@@ -71,6 +71,7 @@ Source: "{#AppParentDirectory}\ru\*.resources.dll"; DestDir: {app}\Languages\ru;
 Source: "{#AppParentDirectory}\tr\*.resources.dll"; DestDir: {app}\Languages\tr; Flags: ignoreversion
 Source: "{#AppParentDirectory}\vi-VN\*.resources.dll"; DestDir: {app}\Languages\vi-VN; Flags: ignoreversion
 Source: "{#AppParentDirectory}\zh-CN\*.resources.dll"; DestDir: {app}\Languages\zh-CN; Flags: ignoreversion
+Source: "puush"; DestDir: {app}; Check: IsPuushMode
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\{#AppFilename}"; WorkingDir: "{app}"
@@ -109,11 +110,6 @@ Root: "HKCU"; Subkey: "Software\Classes\Folder\shell\{#AppName}"; Flags: dontcre
 #include "Scripts\products\msi31.iss"
 #include "Scripts\products\dotnetfx40full.iss"
 
-procedure InitializeWizard;
-begin
-  WizardForm.LicenseAcceptedRadio.Checked := true;
-end;
-
 function InitializeSetup(): Boolean;
 begin
   initwinversion();
@@ -125,4 +121,22 @@ end;
 function DesktopIconExists(): Boolean;
 begin
   Result := FileExists(ExpandConstant('{userdesktop}\{#AppName}.lnk'));
+end;
+
+function CmdLineParamExists(const value: string): Boolean;
+var
+  i: Integer;  
+begin
+  Result := False;
+  for i := 1 to ParamCount do
+    if CompareText(ParamStr(i), value) = 0 then
+    begin
+      Result := True;
+      Exit;
+    end;
+end;
+
+function IsPuushMode: Boolean;
+begin
+  Result := CmdLineParamExists('-puush');
 end;

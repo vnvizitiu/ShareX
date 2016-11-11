@@ -25,7 +25,6 @@
 
 using ShareX.HelpersLib;
 using ShareX.Properties;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
@@ -121,6 +120,18 @@ namespace ShareX
                 }
 
                 Tasks.Enqueue(task);
+
+                UpdateTrayMenu();
+            }
+        }
+
+        public void Clear()
+        {
+            lock (itemsLock)
+            {
+                Tasks.Clear();
+
+                Program.Settings.RecentTasks = null;
 
                 UpdateTrayMenu();
             }

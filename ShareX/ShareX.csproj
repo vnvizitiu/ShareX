@@ -76,13 +76,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="MegaApiClient, Version=1.1.3.98, Culture=neutral, PublicKeyToken=0480d311efbeb4e2, processorArchitecture=MSIL">
-      <HintPath>..\packages\MegaApiClient.1.1.3\lib\net40\MegaApiClient.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Microsoft.VisualBasic" />
-    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net40\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net40\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="SevenZipSharp, Version=0.64.3890.29348, Culture=neutral, PublicKeyToken=20de82c62b055c88, processorArchitecture=MSIL">
@@ -96,11 +92,13 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Speech" />
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CaptureTaskHelpers.cs" />
     <Compile Include="Controls\BeforeUploadControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -230,12 +228,6 @@
     <Compile Include="Forms\AfterUploadForm.designer.cs">
       <DependentUpon>AfterUploadForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\WebpageCaptureForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\WebpageCaptureForm.Designer.cs">
-      <DependentUpon>WebpageCaptureForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="HotkeysConfig.cs" />
     <Compile Include="HotkeyManager.cs" />
     <Compile Include="HotkeySettings.cs" />
@@ -263,7 +255,6 @@
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ImageTag.cs" />
-    <Compile Include="PointInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -276,6 +267,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TaskManager.cs" />
     <Compile Include="TaskSettings.cs" />
+    <Compile Include="UpdateManager.cs" />
     <Compile Include="UploadInfoParser.cs" />
     <Compile Include="UploadInfoStatus.cs" />
     <Compile Include="Forms\HotkeySettingsForm.cs">
@@ -826,16 +818,47 @@
     <EmbeddedResource Include="Forms\MainForm.zh-CN.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\QuickTaskInfoEditForm.de.resx">
+      <DependentUpon>QuickTaskInfoEditForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\QuickTaskInfoEditForm.fr.resx">
+      <DependentUpon>QuickTaskInfoEditForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\QuickTaskInfoEditForm.pt-BR.resx">
+      <DependentUpon>QuickTaskInfoEditForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\QuickTaskInfoEditForm.resx">
+      <DependentUpon>QuickTaskInfoEditForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\QuickTaskInfoEditForm.ru.resx">
       <DependentUpon>QuickTaskInfoEditForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\QuickTaskInfoEditForm.tr.resx">
       <DependentUpon>QuickTaskInfoEditForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\QuickTaskInfoEditForm.zh-CN.resx">
+      <DependentUpon>QuickTaskInfoEditForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\QuickTaskMenuEditorForm.de.resx">
+      <DependentUpon>QuickTaskMenuEditorForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\QuickTaskMenuEditorForm.fr.resx">
+      <DependentUpon>QuickTaskMenuEditorForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\QuickTaskMenuEditorForm.pt-BR.resx">
+      <DependentUpon>QuickTaskMenuEditorForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\QuickTaskMenuEditorForm.resx">
       <DependentUpon>QuickTaskMenuEditorForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\QuickTaskMenuEditorForm.ru.resx">
+      <DependentUpon>QuickTaskMenuEditorForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\QuickTaskMenuEditorForm.tr.resx">
+      <DependentUpon>QuickTaskMenuEditorForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\QuickTaskMenuEditorForm.zh-CN.resx">
       <DependentUpon>QuickTaskMenuEditorForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ScreenColorPicker.de.resx">
@@ -1030,33 +1053,6 @@
     <EmbeddedResource Include="Forms\WatchFolderForm.zh-CN.resx">
       <DependentUpon>WatchFolderForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\WebpageCaptureForm.de.resx">
-      <DependentUpon>WebpageCaptureForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\WebpageCaptureForm.fr.resx">
-      <DependentUpon>WebpageCaptureForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\WebpageCaptureForm.nl-NL.resx">
-      <DependentUpon>WebpageCaptureForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\WebpageCaptureForm.pt-BR.resx">
-      <DependentUpon>WebpageCaptureForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\WebpageCaptureForm.resx">
-      <DependentUpon>WebpageCaptureForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\WebpageCaptureForm.ru.resx">
-      <DependentUpon>WebpageCaptureForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\WebpageCaptureForm.tr.resx">
-      <DependentUpon>WebpageCaptureForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\WebpageCaptureForm.vi-VN.resx">
-      <DependentUpon>WebpageCaptureForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\WebpageCaptureForm.zh-CN.resx">
-      <DependentUpon>WebpageCaptureForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.de.resx" />
     <EmbeddedResource Include="Properties\Resources.es.resx" />
     <EmbeddedResource Include="Properties\Resources.fr.resx" />
@@ -1121,13 +1117,7 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
-    <None Include="Resources\RoundedRectangle.png" />
     <None Include="Resources\Rectangle.png" />
-    <None Include="Resources\Polygon.png" />
-    <None Include="Resources\Fullscreen.png" />
-    <None Include="Resources\FreeHand.png" />
-    <None Include="Resources\Ellipse.png" />
-    <None Include="Resources\Triangle.png" />
     <None Include="Resources\camera.png" />
     <None Include="Resources\navigation-090-button.png" />
     <None Include="Resources\cross-button.png" />
@@ -1136,7 +1126,6 @@
     <None Include="Resources\application-block.png" />
     <None Include="Resources\edit-scale.png" />
     <None Include="Resources\drive-globe.png" />
-    <None Include="Resources\diamond.png" />
     <None Include="Resources\notebook.png" />
     <None Include="Resources\image.png" />
     <None Include="Resources\application-browser.png" />
@@ -1173,19 +1162,10 @@
     <None Include="Resources\layer-shape-curve.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\layer-shape-ellipse.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\layer-shape-round.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\layer-shape-polygon.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\layer-shape.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\layers-ungroup.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\monitor.png" />
@@ -1195,9 +1175,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\layer.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\layers-arrange.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\control-record.png" />
@@ -1232,7 +1209,6 @@
     <None Include="Resources\clock.png" />
     <None Include="Resources\heart.png" />
     <None Include="Resources\crown.png" />
-    <None Include="Resources\layer--pencil.png" />
     <None Include="Resources\globe-share.png" />
     <None Include="Resources\document-copy.png" />
     <None Include="Resources\image--pencil.png" />
@@ -1275,6 +1251,27 @@
     <None Include="Resources\layout-select.png" />
     <None Include="Resources\disk-black.png" />
     <None Include="Resources\control.png" />
+    <None Include="Resources\information.png" />
+    <None Include="Resources\layer_fullscreen.png" />
+    <None Include="Resources\layers.png" />
+    <None Include="Resources\edit-drop-cap.png" />
+    <None Include="Resources\ui-menu-blue.png" />
+    <None Include="Resources\application-text-image.png" />
+    <None Include="Resources\clipboard-paste-image.png" />
+    <None Include="Resources\printer.png" />
+    <None Include="Resources\disk.png" />
+    <None Include="Resources\disk-rename.png" />
+    <None Include="Resources\disk-small.png" />
+    <None Include="Resources\application-terminal.png" />
+    <None Include="Resources\clipboard-block.png" />
+    <None Include="Resources\folder-stand.png" />
+    <None Include="Resources\application--arrow.png" />
+    <None Include="Resources\clipboard-paste-document-text.png" />
+    <None Include="Resources\globe--arrow.png" />
+    <None Include="Resources\Patreon_Button_01.png" />
+    <None Include="Resources\Patreon_Button_02.png" />
+    <None Include="Resources\drive-download.png" />
+    <None Include="Resources\drive-upload.png" />
     <Content Include="ShareX_Icon.ico" />
     <None Include="Resources\globe--pencil.png" />
     <None Include="Resources\camcorder--pencil.png" />

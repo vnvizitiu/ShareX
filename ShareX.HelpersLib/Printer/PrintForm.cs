@@ -45,10 +45,6 @@ namespace ShareX.HelpersLib
             LoadSettings();
         }
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -65,6 +61,11 @@ namespace ShareX.HelpersLib
             }
 
             base.Dispose(disposing);
+        }
+
+        private void PrintForm_Shown(object sender, EventArgs e)
+        {
+            this.ForceActivate();
         }
 
         private void LoadSettings()
@@ -85,6 +86,7 @@ namespace ShareX.HelpersLib
         private void btnPrint_Click(object sender, EventArgs e)
         {
             printHelper.Print();
+
             DialogResult = DialogResult.OK;
             Close();
         }

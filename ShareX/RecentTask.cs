@@ -25,10 +25,6 @@
 
 using ShareX.HelpersLib;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 
 namespace ShareX
 {
@@ -40,14 +36,18 @@ namespace ShareX
         {
             get
             {
-                string text = ToString();
+                string text = "";
 
-                if (!string.IsNullOrEmpty(text))
+                if (!string.IsNullOrEmpty(FilePath))
                 {
-                    text = Path.GetFileName(text);
+                    text = FilePath;
+                }
+                else if (!string.IsNullOrEmpty(URL))
+                {
+                    text = URL;
                 }
 
-                return text;
+                return Helpers.GetFilenameSafe(text);
             }
         }
 

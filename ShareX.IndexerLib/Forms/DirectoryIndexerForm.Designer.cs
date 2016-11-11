@@ -144,6 +144,7 @@
             this.pgSettings.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pgSettings.Location = new System.Drawing.Point(0, 0);
             this.pgSettings.Name = "pgSettings";
+            this.pgSettings.PropertySort = System.Windows.Forms.PropertySort.Categorized;
             this.pgSettings.Size = new System.Drawing.Size(860, 564);
             this.pgSettings.TabIndex = 0;
             this.pgSettings.ToolbarVisible = false;
@@ -152,6 +153,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.SystemColors.Window;
             this.ClientSize = new System.Drawing.Size(884, 661);
             this.Controls.Add(this.tcMain);
             this.Controls.Add(this.btnUpload);

@@ -25,14 +25,38 @@
 
 using Newtonsoft.Json;
 using ShareX.HelpersLib;
-using ShareX.UploadersLib.HelperClasses;
+using ShareX.UploadersLib.Properties;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Drawing;
 using System.IO;
+using System.Windows.Forms;
 using System.Xml.Linq;
 
 namespace ShareX.UploadersLib.ImageUploaders
 {
+    public class PicasaImageUploaderService : ImageUploaderService
+    {
+        public override ImageDestination EnumValue { get; } = ImageDestination.Picasa;
+
+        public override Icon ServiceIcon => Resources.Picasa;
+
+        public override bool CheckConfig(UploadersConfig config)
+        {
+            return OAuth2Info.CheckOAuth(config.PicasaOAuth2Info);
+        }
+
+        public override GenericUploader CreateUploader(UploadersConfig config, TaskReferenceHelper taskInfo)
+        {
+            return new Picasa(config.PicasaOAuth2Info)
+            {
+                AlbumID = config.PicasaAlbumID
+            };
+        }
+
+        public override TabPage GetUploadersConfigTabPage(UploadersConfigForm form) => form.tpPicasa;
+    }
+
     public class Picasa : ImageUploader, IOAuth2
     {
         public OAuth2Info AuthInfo { get; set; }
@@ -182,25 +206,28 @@ namespace ShareX.UploadersLib.ImageUploaders
 
             ur.Response = SendRequestStream(url, stream, contentType, headers);
 
-            XDocument xd = XDocument.Parse(ur.Response);
-
-            XElement entry_element = xd.Element(AtomNS + "entry");
-
-            if (entry_element != null)
+            if (ur.Response != null)
             {
-                XElement group_element = entry_element.Element(MediaNS + "group");
+                XDocument xd = XDocument.Parse(ur.Response);
 
-                if (group_element != null)
+                XElement entry_element = xd.Element(AtomNS + "entry");
+
+                if (entry_element != null)
                 {
-                    XElement content_element = group_element.Element(MediaNS + "content");
+                    XElement group_element = entry_element.Element(MediaNS + "group");
 
-                    if (content_element != null)
+                    if (group_element != null)
                     {
-                        ur.ThumbnailURL = content_element.GetAttributeValue("url");
+                        XElement content_element = group_element.Element(MediaNS + "content");
 
-                        int last_slash_index = ur.ThumbnailURL.LastIndexOf(@"/");
+                        if (content_element != null)
+                        {
+                            ur.ThumbnailURL = content_element.GetAttributeValue("url");
 
-                        ur.URL = ur.ThumbnailURL.Insert(last_slash_index, @"/s0");
+                            int last_slash_index = ur.ThumbnailURL.LastIndexOf(@"/");
+
+                            ur.URL = ur.ThumbnailURL.Insert(last_slash_index, @"/s0");
+                        }
                     }
                 }
             }

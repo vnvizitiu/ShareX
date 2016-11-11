@@ -34,8 +34,7 @@ namespace ShareX
     {
         public ClipboardFormat ClipboardFormat { get; private set; }
 
-        public ClipboardFormatForm()
-            : this(new ClipboardFormat())
+        public ClipboardFormatForm() : this(new ClipboardFormat())
         {
         }
 
@@ -47,7 +46,7 @@ namespace ShareX
             ClipboardFormat = cbf;
             txtDescription.Text = cbf.Description ?? "";
             txtFormat.Text = cbf.Format ?? "";
-            CodeMenu.Create<ReplCodeMenuEntry>(txtFormat);
+            CodeMenu.Create<CodeMenuEntryFilename>(txtFormat);
             lblExample.Text = string.Format(Resources.ClipboardFormatForm_ClipboardFormatForm_Supported_variables___0__and_other_variables_such_as__1__etc_,
                 "$result, $url, $shorturl, $thumbnailurl, $deletionurl, $filepath, $filename, $filenamenoext, $thumbnailfilename, $thumbnailfilenamenoext, $folderpath, $foldername, $uploadtime",
                 "%y, %mo, %d");
@@ -57,12 +56,15 @@ namespace ShareX
         {
             ClipboardFormat.Description = txtDescription.Text;
             ClipboardFormat.Format = txtFormat.Text;
+
             DialogResult = DialogResult.OK;
+            Close();
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.Cancel;
+            Close();
         }
     }
 }

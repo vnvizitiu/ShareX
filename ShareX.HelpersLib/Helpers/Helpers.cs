@@ -24,7 +24,7 @@
 #endregion License Information (GPL v3)
 
 using Microsoft.Win32;
-using ShareX.HelpersLib;
+using Newtonsoft.Json.Linq;
 using ShareX.HelpersLib.Properties;
 using System;
 using System.Collections.Generic;
@@ -62,6 +62,10 @@ namespace ShareX.HelpersLib
         public const string URLPathCharacters = URLCharacters + "/"; // 47
         public const string ValidURLCharacters = URLPathCharacters + ":?#[]@!$&'()*+,;= ";
 
+        public static readonly string[] ImageFileExtensions = new string[] { "jpg", "jpeg", "png", "gif", "bmp", "ico", "tif", "tiff" };
+        public static readonly string[] TextFileExtensions = new string[] { "txt", "log", "nfo", "c", "cpp", "cc", "cxx", "h", "hpp", "hxx", "cs", "vb", "html", "htm", "xhtml", "xht", "xml", "css", "js", "php", "bat", "java", "lua", "py", "pl", "cfg", "ini", "dart" };
+        public static readonly string[] VideoFileExtensions = new string[] { "mp4", "webm", "mkv", "avi", "vob", "ogv", "ogg", "mov", "qt", "wmv", "m4p", "m4v", "mpg", "mp2", "mpeg", "mpe", "mpv", "m2v", "m4v", "flv", "f4v" };
+
         public static readonly Version OSVersion = Environment.OSVersion.Version;
 
         // Extension without dot
@@ -73,11 +77,31 @@ namespace ShareX.HelpersLib
 
                 if (pos >= 0)
                 {
-                    return filePath.Substring(pos + 1).ToLowerInvariant();
+                    return filePath.Substring(pos + 1);
                 }
             }
 
             return null;
+        }
+
+        public static string GetFilenameSafe(string filePath)
+        {
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                int pos = filePath.LastIndexOf('\\');
+
+                if (pos < 0)
+                {
+                    pos = filePath.LastIndexOf('/');
+                }
+
+                if (pos >= 0)
+                {
+                    return filePath.Substring(pos + 1);
+                }
+            }
+
+            return filePath;
         }
 
         public static string ChangeFilenameExtension(string filePath, string extension)
@@ -110,13 +134,13 @@ namespace ShareX.HelpersLib
             return filePath.TrimEnd('.') + '.' + extension.TrimStart('.');
         }
 
-        private static bool IsValidFile(string filePath, Type enumType)
+        public static bool CheckExtension(string filePath, IEnumerable<string> extensions)
         {
             string ext = GetFilenameExtension(filePath);
 
             if (!string.IsNullOrEmpty(ext))
             {
-                return Enum.GetNames(enumType).Any(x => ext.Equals(x, StringComparison.InvariantCultureIgnoreCase));
+                return extensions.Any(x => ext.Equals(x, StringComparison.InvariantCultureIgnoreCase));
             }
 
             return false;
@@ -124,12 +148,17 @@ namespace ShareX.HelpersLib
 
         public static bool IsImageFile(string filePath)
         {
-            return IsValidFile(filePath, typeof(ImageFileExtensions));
+            return CheckExtension(filePath, ImageFileExtensions);
         }
 
         public static bool IsTextFile(string filePath)
         {
-            return IsValidFile(filePath, typeof(TextFileExtensions));
+            return CheckExtension(filePath, TextFileExtensions);
+        }
+
+        public static bool IsVideoFile(string filePath)
+        {
+            return CheckExtension(filePath, VideoFileExtensions);
         }
 
         public static EDataType FindDataType(string filePath)
@@ -244,7 +273,7 @@ namespace ShareX.HelpersLib
 
         public static string GetXMLValue(string input, string tag)
         {
-            return Regex.Match(input, String.Format("(?<={0}>).+?(?=</{0})", tag)).Value;
+            return Regex.Match(input, string.Format("(?<={0}>).+?(?=</{0})", tag)).Value;
         }
 
         public static string GetMimeType(string fileName)
@@ -334,7 +363,7 @@ namespace ShareX.HelpersLib
         // returns a list of public static fields of the class type (similar to enum values)
         public static T[] GetValueFields<T>()
         {
-            var res = new List<T>();
+            List<T> res = new List<T>();
             foreach (FieldInfo fi in typeof(T).GetFields(BindingFlags.Static | BindingFlags.Public))
             {
                 if (fi.FieldType != typeof(T)) continue;
@@ -366,27 +395,75 @@ namespace ShareX.HelpersLib
             return sb.ToString();
         }
 
-        public static void OpenFolder(string folderPath)
-        {
-            if (!string.IsNullOrEmpty(folderPath))
-            {
-                if (Directory.Exists(folderPath))
-                {
-                    Process.Start("explorer.exe", folderPath);
-                }
-                else
-                {
-                    MessageBox.Show(Resources.Helpers_OpenFolder_Folder_not_exist_ + "\r\n" + folderPath, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-            }
-        }
-
-        public static void OpenFolderWithFile(string filePath)
+        public static bool OpenFile(string filePath)
         {
             if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath))
             {
-                Process.Start("explorer.exe", string.Format("/select,\"{0}\"", filePath));
+                try
+                {
+                    Process.Start(filePath);
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    DebugHelper.WriteException(e, $"OpenFile({filePath}) failed.");
+                }
             }
+            else
+            {
+                MessageBox.Show(Resources.Helpers_OpenFile_File_not_exist_ + Environment.NewLine + filePath, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+
+            return false;
+        }
+
+        public static bool OpenFolder(string folderPath)
+        {
+            if (!string.IsNullOrEmpty(folderPath) && Directory.Exists(folderPath))
+            {
+                if (!folderPath.EndsWith(@"\"))
+                {
+                    folderPath += @"\";
+                }
+
+                try
+                {
+                    Process.Start(folderPath);
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    DebugHelper.WriteException(e, $"OpenFolder({folderPath}) failed.");
+                }
+            }
+            else
+            {
+                MessageBox.Show(Resources.Helpers_OpenFolder_Folder_not_exist_ + Environment.NewLine + folderPath, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+
+            return false;
+        }
+
+        public static bool OpenFolderWithFile(string filePath)
+        {
+            if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath))
+            {
+                try
+                {
+                    NativeMethods.OpenFolderAndSelectFile(filePath);
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    DebugHelper.WriteException(e, $"OpenFolderWithFile({filePath}) failed.");
+                }
+            }
+            else
+            {
+                MessageBox.Show(Resources.Helpers_OpenFile_File_not_exist_ + Environment.NewLine + filePath, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -475,24 +552,6 @@ namespace ShareX.HelpersLib
             return Application.ExecutablePath.StartsWith(path);
         }
 
-        public static void OpenFile(string filepath)
-        {
-            if (!string.IsNullOrEmpty(filepath) && File.Exists(filepath))
-            {
-                TaskEx.Run(() =>
-                {
-                    try
-                    {
-                        Process.Start(filepath);
-                    }
-                    catch (Exception e)
-                    {
-                        DebugHelper.WriteException(e, string.Format("OpenFile({0}) failed", filepath));
-                    }
-                });
-            }
-        }
-
         public static bool IsValidIPAddress(string ip)
         {
             if (string.IsNullOrEmpty(ip)) return false;
@@ -578,6 +637,11 @@ namespace ShareX.HelpersLib
             }
         }
 
+        public static bool BrowseFile(TextBox tb, string initialDirectory = "", bool detectSpecialFolders = false)
+        {
+            return BrowseFile("ShareX - " + Resources.Helpers_BrowseFile_Choose_file, tb, initialDirectory, detectSpecialFolders);
+        }
+
         public static bool BrowseFile(string title, TextBox tb, string initialDirectory = "", bool detectSpecialFolders = false)
         {
             using (OpenFileDialog ofd = new OpenFileDialog())
@@ -616,6 +680,11 @@ namespace ShareX.HelpersLib
             return false;
         }
 
+        public static bool BrowseFolder(TextBox tb, string initialDirectory = "", bool detectSpecialFolders = false)
+        {
+            return BrowseFolder("ShareX - " + Resources.Helpers_BrowseFolder_Choose_folder, tb, initialDirectory, detectSpecialFolders);
+        }
+
         public static bool BrowseFolder(string title, TextBox tb, string initialDirectory = "", bool detectSpecialFolders = false)
         {
             using (FolderSelectDialog fsd = new FolderSelectDialog())
@@ -649,7 +718,6 @@ namespace ShareX.HelpersLib
             {
                 try
                 {
-                    // TODO: folderPath = folderPath.Replace(Program.ToolsFolder, $"%ShareX%", StringComparison.InvariantCultureIgnoreCase));
                     GetEnums<Environment.SpecialFolder>().ForEach(x => path = path.Replace(Environment.GetFolderPath(x), $"%{x}%", StringComparison.InvariantCultureIgnoreCase));
                 }
                 catch (Exception e)
@@ -667,7 +735,6 @@ namespace ShareX.HelpersLib
             {
                 try
                 {
-                    // TODO: folderPath = folderPath.Replace($"%ShareX%", Program.ToolsFolder, StringComparison.InvariantCultureIgnoreCase));
                     GetEnums<Environment.SpecialFolder>().ForEach(x => path = path.Replace($"%{x}%", Environment.GetFolderPath(x), StringComparison.InvariantCultureIgnoreCase));
                     path = Environment.ExpandEnvironmentVariables(path);
                 }
@@ -922,7 +989,7 @@ namespace ShareX.HelpersLib
 
         public static string GetAbsolutePath(string path)
         {
-            path = Helpers.ExpandFolderVariables(path);
+            path = ExpandFolderVariables(path);
 
             if (!Path.IsPathRooted(path)) // Is relative path?
             {
@@ -1024,6 +1091,52 @@ namespace ShareX.HelpersLib
             finally
             {
                 handle.Free();
+            }
+        }
+
+        // http://goessner.net/articles/JsonPath/
+        public static string ParseJSON(string text, string jsonPath)
+        {
+            return (string)JToken.Parse(text).SelectToken("$." + jsonPath);
+        }
+
+        public static T[] GetInstances<T>() where T : class
+        {
+            IEnumerable<T> instances = from t in Assembly.GetCallingAssembly().GetTypes()
+                                       where t.IsClass && t.IsSubclassOf(typeof(T)) && t.GetConstructor(Type.EmptyTypes) != null
+                                       select Activator.CreateInstance(t) as T;
+
+            return instances.ToArray();
+        }
+
+        public static string GetWindowsProductName()
+        {
+            try
+            {
+                RegistryKey rk = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion");
+
+                if (rk != null)
+                {
+                    string productName = rk.GetValue("ProductName") as string;
+
+                    if (!string.IsNullOrEmpty(productName))
+                    {
+                        return productName;
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            return Environment.OSVersion.VersionString;
+        }
+
+        public static Cursor CreateCursor(byte[] data)
+        {
+            using (MemoryStream ms = new MemoryStream(data))
+            {
+                return new Cursor(ms);
             }
         }
     }

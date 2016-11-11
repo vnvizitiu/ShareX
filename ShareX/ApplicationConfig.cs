@@ -24,7 +24,9 @@
 #endregion License Information (GPL v3)
 
 using ShareX.HelpersLib;
+using ShareX.ScreenCaptureLib;
 using ShareX.UploadersLib;
+using ShareX.UploadersLib.OtherServices;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -39,10 +41,10 @@ namespace ShareX
         public string FileUploadDefaultDirectory = "";
         public bool ShowUploadWarning = true; // First time upload warning
         public bool ShowMultiUploadWarning = true; // More than 10 files upload warning
-        public bool ShowTrayLeftClickTip = true; // Tray icon left click tip
         public int NameParserAutoIncrementNumber = 0;
         public bool DisableHotkeys = false;
         public List<QuickTaskInfo> QuickTaskPresets = QuickTaskInfo.DefaultPresets;
+        public bool ShowPatreonButton = true;
 
         public ApplicationConfig()
         {
@@ -72,12 +74,19 @@ namespace ShareX
         public bool RememberMainFormSize = false;
         public Size MainFormSize = Size.Empty;
 
+        public HotkeyType TrayLeftClickAction = HotkeyType.RectangleRegion;
+        public HotkeyType TrayLeftDoubleClickAction = HotkeyType.OpenMainWindow;
+        public HotkeyType TrayMiddleClickAction = HotkeyType.PrintScreen;
+
+        public bool CheckPreReleaseUpdates = false;
+
         #endregion General
 
         #region Paths
 
         public bool UseCustomScreenshotsPath = false;
-        public string CustomScreenshotsPath = string.Empty;
+        public string CustomScreenshotsPath = "";
+
         public string SaveImageSubFolderPattern = "%y-%mo";
 
         #endregion Paths
@@ -123,12 +132,13 @@ namespace ShareX
         public bool RecentTasksTrayMenuMostRecentFirst = false;
 
         public WindowState HistoryWindowState = new WindowState();
+        public int HistoryMaxItemCount = 0;
         public int HistorySplitterDistance = 550;
 
         public WindowState ImageHistoryWindowState = new WindowState();
-        public int ImageHistoryMaxItemCount = 100;
         public int ImageHistoryViewMode = 3;
-        public Size ImageHistoryThumbnailSize = new Size(100, 100);
+        public Size ImageHistoryThumbnailSize = new Size(150, 150);
+        public int ImageHistoryMaxItemCount = 250;
 
         #endregion History
 
@@ -165,19 +175,14 @@ namespace ShareX
         [Category("Application"), DefaultValue(false), Description("Show only customized tasks in main window workflows.")]
         public bool WorkflowsOnlyShowEdited { get; set; }
 
-#if !STEAM
         [Category("Application"), DefaultValue(true), Description("Automatically check updates.")]
-        public bool AutoCheckUpdate { get; set; }
+#if STEAM
+        [Browsable(false)]
 #endif
+        public bool AutoCheckUpdate { get; set; }
 
         [Category("Application"), DefaultValue(true), Description("Automatically expand capture menu when you open the tray menu.")]
         public bool TrayAutoExpandCaptureMenu { get; set; }
-
-        [Category("Application"), DefaultValue(HotkeyType.RectangleRegion), Description("You can set which action to happen when you left click tray icon."), TypeConverter(typeof(EnumDescriptionConverter))]
-        public HotkeyType TrayLeftClickAction { get; set; }
-
-        [Category("Application"), DefaultValue(HotkeyType.PrintScreen), Description("You can set which action to happen when you middle click tray icon."), TypeConverter(typeof(EnumDescriptionConverter))]
-        public HotkeyType TrayMiddleClickAction { get; set; }
 
         [Category("Application"), DefaultValue(true), Description("Show tips in main window list when list is empty.")]
         public bool ShowMainWindowTip { get; set; }
@@ -192,6 +197,18 @@ namespace ShareX
         [Category("Application"), DefaultValue(false), Description("Automatically detect external changes to UploaderConfig file and load settings to memory.")]
         public bool DetectUploaderConfigFileChanges { get; set; }
 
+        [Category("Application"), DefaultValue(false), Description("Show version and build info in tray text so if you are running more than one ShareX build you can differentiate them in tray bar.")]
+        public bool TrayTextMoreInfo { get; set; }
+
+        [Category("Upload"), DefaultValue(false), Description("Can be used to disable uploading application wide.")]
+        public bool DisableUpload { get; set; }
+
+        [Category("Upload"), DefaultValue(false), Description("Accept invalid SSL certificates when uploading.")]
+        public bool AcceptInvalidSSLCertificates { get; set; }
+
+        [Category("Application"), DefaultValue(true), Description("Save settings after task completed but only if there is no other active tasks. This setting will be handy for situations where setting save fails when Windows shutdown and not let ShareX to save in time.")]
+        public bool SaveSettingsAfterTaskCompleted { get; set; }
+
         [Category("Clipboard upload"), DefaultValue(true), Description("Show clipboard content viewer when using clipboard upload in main window.")]
         public bool ShowClipboardContentViewer { get; set; }
 
@@ -202,6 +219,10 @@ namespace ShareX
         [Category("Paths"), Description("Custom hotkeys configuration path. If you have already configured this setting in another device and you are attempting to use the same location, then backup the file before configuring this setting and restore after exiting ShareX.")]
         [Editor(typeof(DirectoryNameEditor), typeof(UITypeEditor))]
         public string CustomHotkeysConfigPath { get; set; }
+
+        [Category("Paths"), Description("Custom screenshot path (secondary location). If custom screenshot path is temporarily unavailable (e.g. network share), ShareX will use this location (recommended to be a local path).")]
+        [Editor(typeof(DirectoryNameEditor), typeof(UITypeEditor))]
+        public string CustomScreenshotsPath2 { get; set; }
 
         [Category("Drag and drop window"), DefaultValue(150), Description("Size of drop window.")]
         public int DropSize { get; set; }
@@ -245,9 +266,14 @@ namespace ShareX
 
         #region Webpage Capture Form
 
-        public Size WebpageCaptureBrowserSize = Size.Empty;
-        public float WebpageCaptureDelay = 0f;
+        public WebpageCaptureOptions WebpageCaptureOptions = new WebpageCaptureOptions();
 
         #endregion Webpage Capture Form
+
+        #region OCR Form
+
+        public OCRSpaceLanguages OCRLanguage = OCRSpaceLanguages.eng;
+
+        #endregion OCR Form
     }
 }

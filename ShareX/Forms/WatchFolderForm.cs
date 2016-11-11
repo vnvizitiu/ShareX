@@ -24,7 +24,6 @@
 #endregion License Information (GPL v3)
 
 using ShareX.HelpersLib;
-using ShareX.Properties;
 using System;
 using System.Windows.Forms;
 
@@ -34,8 +33,7 @@ namespace ShareX
     {
         public WatchFolderSettings WatchFolder { get; private set; }
 
-        public WatchFolderForm()
-            : this(new WatchFolderSettings())
+        public WatchFolderForm() : this(new WatchFolderSettings())
         {
         }
 
@@ -51,7 +49,7 @@ namespace ShareX
 
         private void btnPathBrowse_Click(object sender, EventArgs e)
         {
-            Helpers.BrowseFolder("ShareX - " + Resources.WatchFolderForm_btnPathBrowse_Click_Choose_folder_path, txtFolderPath, "", true);
+            Helpers.BrowseFolder(txtFolderPath, "", true);
         }
 
         private void btnOK_Click(object sender, EventArgs e)
@@ -59,12 +57,15 @@ namespace ShareX
             WatchFolder.FolderPath = txtFolderPath.Text;
             WatchFolder.Filter = txtFilter.Text;
             WatchFolder.IncludeSubdirectories = cbIncludeSubdirectories.Checked;
+
             DialogResult = DialogResult.OK;
+            Close();
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.Cancel;
+            Close();
         }
     }
 }

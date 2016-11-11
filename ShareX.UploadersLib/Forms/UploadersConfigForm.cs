@@ -26,12 +26,12 @@
 using CG.Web.MegaApiClient;
 using ShareX.HelpersLib;
 using ShareX.UploadersLib.FileUploaders;
-using ShareX.UploadersLib.HelperClasses;
 using ShareX.UploadersLib.ImageUploaders;
 using ShareX.UploadersLib.Properties;
 using ShareX.UploadersLib.TextUploaders;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -41,26 +41,37 @@ namespace ShareX.UploadersLib
 {
     public partial class UploadersConfigForm : Form
     {
+        private static UploadersConfigForm instance;
+
         public UploadersConfig Config { get; private set; }
 
         private ImageList uploadersImageList;
-        private URLType urlType = URLType.URL;
+        private URLType customUploaderURLType = URLType.URL;
 
-        public UploadersConfigForm(UploadersConfig uploadersConfig)
+        private UploadersConfigForm(UploadersConfig config)
         {
-            Config = uploadersConfig;
+            Config = config;
             InitializeComponent();
-            Icon = ShareXResources.Icon;
+            InitializeControls();
+        }
 
-            if (!string.IsNullOrEmpty(Config.FilePath))
+        public static UploadersConfigForm GetFormInstance(UploadersConfig config, out bool firstInstance)
+        {
+            if (instance == null || instance.IsDisposed)
             {
-                Text += " - " + Config.FilePath;
+                instance = new UploadersConfigForm(config);
+                firstInstance = true;
             }
+            else
+            {
+                firstInstance = false;
+            }
+
+            return instance;
         }
 
         private void UploadersConfigForm_Shown(object sender, EventArgs e)
         {
-            FormSettings();
             LoadSettings();
         }
 
@@ -69,69 +80,26 @@ namespace ShareX.UploadersLib
             Refresh();
         }
 
-        private void FormSettings()
+        private void InitializeControls()
         {
-            uploadersImageList = new ImageList();
-            uploadersImageList.ColorDepth = ColorDepth.Depth32Bit;
+            Icon = ShareXResources.Icon;
 
-            AddIconToTab(tpAdFly, Resources.AdFly);
-            AddIconToTab(tpAmazonS3, Resources.AmazonS3);
-            AddIconToTab(tpBitly, Resources.Bitly);
-            AddIconToTab(tpBox, Resources.Box);
-            AddIconToTab(tpChevereto, Resources.Chevereto);
-            AddIconToTab(tpCoinURL, Resources.CoinURL);
-            AddIconToTab(tpCopy, Resources.Copy);
-            AddIconToTab(tpCustomUploaders, Resources.globe_network);
-            AddIconToTab(tpDropbox, Resources.Dropbox);
-            AddIconToTab(tpEmail, Resources.mail);
-            AddIconToTab(tpFlickr, Resources.Flickr);
-            AddIconToTab(tpFTP, Resources.folder_network);
-            AddIconToTab(tpGe_tt, Resources.Gett);
-            AddIconToTab(tpGist, Resources.GitHub);
-            AddIconToTab(tpGoogleDrive, Resources.GoogleDrive);
-            AddIconToTab(tpGoogleURLShortener, Resources.Google);
-            AddIconToTab(tpHastebin, Resources.Hastebin);
-            AddIconToTab(tpHostr, Resources.Hostr);
-            AddIconToTab(tpImageShack, Resources.ImageShack);
-            AddIconToTab(tpImgur, Resources.Imgur);
-            AddIconToTab(tpJira, Resources.jira);
-            AddIconToTab(tpLambda, Resources.Lambda);
-            AddIconToTab(tpMediaFire, Resources.MediaFire);
-            AddIconToTab(tpMega, Resources.Mega);
-            AddIconToTab(tpMinus, Resources.Minus);
-            AddIconToTab(tpOneDrive, Resources.OneDrive);
-            AddIconToTab(tpOneTimeSecret, Resources.OneTimeSecret);
-            AddIconToTab(tpOwnCloud, Resources.OwnCloud);
-            AddIconToTab(tpPaste_ee, Resources.page_white_text);
-            AddIconToTab(tpPastebin, Resources.Pastebin);
-            AddIconToTab(tpPhotobucket, Resources.Photobucket);
-            AddIconToTab(tpPicasa, Resources.Picasa);
-            AddIconToTab(tpPolr, Resources.Polr);
-            AddIconToTab(tpPomf, Resources.Pomf);
-            AddIconToTab(tpPushbullet, Resources.Pushbullet);
-            AddIconToTab(tpSeafile, Resources.Seafile);
-            AddIconToTab(tpSendSpace, Resources.SendSpace);
-            AddIconToTab(tpSharedFolder, Resources.server_network);
-            AddIconToTab(tpSomeImage, Resources.SomeImage);
-            AddIconToTab(tpStreamable, Resources.Streamable);
-            AddIconToTab(tpSul, Resources.Sul);
-            AddIconToTab(tpTinyPic, Resources.TinyPic);
-            AddIconToTab(tpTwitter, Resources.Twitter);
-            AddIconToTab(tpUp1, Resources.Up1);
-            AddIconToTab(tpUpaste, Resources.Upaste);
-            AddIconToTab(tpVgyme, Resources.Vgyme);
-            AddIconToTab(tpYourls, Resources.Yourls);
+            if (!string.IsNullOrEmpty(Config.FilePath))
+            {
+                Text += " - " + Config.FilePath;
+            }
+
+            AddIconToTabs();
 
             ttlvMain.ImageList = uploadersImageList;
             ttlvMain.MainTabControl = tcUploaders;
             ttlvMain.FocusListView();
 
-            CodeMenu.Create(txtDropboxPath, ReplCodeMenuEntry.n, ReplCodeMenuEntry.t, ReplCodeMenuEntry.pn);
-            CodeMenu.Create(txtCopyPath, ReplCodeMenuEntry.n, ReplCodeMenuEntry.t, ReplCodeMenuEntry.pn);
-            CodeMenu.Create(txtAmazonS3ObjectPrefix, ReplCodeMenuEntry.n, ReplCodeMenuEntry.t, ReplCodeMenuEntry.pn);
-            CodeMenu.Create(txtMediaFirePath, ReplCodeMenuEntry.n, ReplCodeMenuEntry.t, ReplCodeMenuEntry.pn);
-            CodeMenu.Create(txtCustomUploaderArgValue, ReplCodeMenuEntry.n, ReplCodeMenuEntry.t, ReplCodeMenuEntry.pn);
-            CodeMenu.Create(txtCustomUploaderHeaderValue, ReplCodeMenuEntry.n, ReplCodeMenuEntry.t, ReplCodeMenuEntry.pn);
+            CodeMenu.Create<CodeMenuEntryFilename>(txtDropboxPath, CodeMenuEntryFilename.n, CodeMenuEntryFilename.t, CodeMenuEntryFilename.pn);
+            CodeMenu.Create<CodeMenuEntryFilename>(txtAmazonS3ObjectPrefix, CodeMenuEntryFilename.n, CodeMenuEntryFilename.t, CodeMenuEntryFilename.pn);
+            CodeMenu.Create<CodeMenuEntryFilename>(txtMediaFirePath, CodeMenuEntryFilename.n, CodeMenuEntryFilename.t, CodeMenuEntryFilename.pn);
+            CodeMenu.Create<CodeMenuEntryFilename>(txtCustomUploaderArgValue, CodeMenuEntryFilename.n, CodeMenuEntryFilename.t, CodeMenuEntryFilename.pn);
+            CodeMenu.Create<CodeMenuEntryFilename>(txtCustomUploaderHeaderValue, CodeMenuEntryFilename.n, CodeMenuEntryFilename.t, CodeMenuEntryFilename.pn);
 
             txtCustomUploaderLog.AddContextMenu();
 
@@ -151,18 +119,51 @@ namespace ShareX.UploadersLib
 
             eiFTP.ObjectType = typeof(FTPAccount);
             eiCustomUploaders.ObjectType = typeof(CustomUploaderItem);
+
+#if DEBUG
+            btnCheveretoTestAll.Visible = true;
+            btnPomfTest.Visible = true;
+#endif
         }
 
-        private void AddIconToTab(TabPage tp, Icon icon)
+        private void AddIconToTabs()
         {
-            uploadersImageList.Images.Add(tp.Name, icon);
-            tp.ImageKey = tp.Name;
+            uploadersImageList = new ImageList();
+            uploadersImageList.ColorDepth = ColorDepth.Depth32Bit;
+
+            foreach (IUploaderService uploaderService in UploaderFactory.AllServices)
+            {
+                TabPage tp = uploaderService.GetUploadersConfigTabPage(this);
+
+                if (tp != null && string.IsNullOrEmpty(tp.ImageKey))
+                {
+                    Icon icon = uploaderService.ServiceIcon;
+
+                    if (icon != null)
+                    {
+                        uploadersImageList.Images.Add(tp.Name, icon);
+                        tp.ImageKey = tp.Name;
+                    }
+                    else
+                    {
+                        Image img = uploaderService.ServiceImage;
+
+                        if (img != null)
+                        {
+                            uploadersImageList.Images.Add(tp.Name, img);
+                            tp.ImageKey = tp.Name;
+                        }
+                    }
+                }
+            }
         }
 
-        private void AddIconToTab(TabPage tp, Bitmap bitmap)
+        public void NavigateToTabPage(TabPage tp)
         {
-            uploadersImageList.Images.Add(tp.Name, bitmap);
-            tp.ImageKey = tp.Name;
+            if (tp != null)
+            {
+                ttlvMain.NavigateToTabPage(tp);
+            }
         }
 
         public void LoadSettings()
@@ -279,6 +280,7 @@ namespace ShareX.UploadersLib
                 }
             }
             txtPastebinTitle.Text = Config.PastebinSettings.Title;
+            cbPastebinRaw.Checked = Config.PastebinSettings.RawURL;
 
             // Paste.ee
 
@@ -287,12 +289,14 @@ namespace ShareX.UploadersLib
             // Gist
 
             atcGistAccountType.SelectedAccountType = Config.GistAnonymousLogin ? AccountType.Anonymous : AccountType.User;
-            chkGistPublishPublic.Checked = Config.GistPublishPublic;
 
             if (OAuth2Info.CheckOAuth(Config.GistOAuth2Info))
             {
                 oAuth2Gist.Status = OAuthLoginStatus.LoginSuccessful;
             }
+
+            cbGistPublishPublic.Checked = Config.GistPublishPublic;
+            cbGistUseRawURL.Checked = Config.GistRawURL;
 
             // Upaste
 
@@ -303,6 +307,7 @@ namespace ShareX.UploadersLib
 
             txtHastebinCustomDomain.Text = Config.HastebinCustomDomain;
             txtHastebinSyntaxHighlighting.Text = Config.HastebinSyntaxHighlighting;
+            cbHastebinUseFileExtension.Checked = Config.HastebinUseFileExtension;
 
             // OneTimeSecret
 
@@ -312,6 +317,21 @@ namespace ShareX.UploadersLib
             #endregion Text uploaders
 
             #region File uploaders
+
+            // FTP
+
+            if (Config.FTPAccountList == null || Config.FTPAccountList.Count == 0)
+            {
+                FTPSetup(new List<FTPAccount>());
+            }
+            else
+            {
+                FTPSetup(Config.FTPAccountList);
+                if (ucFTPAccounts.lbAccounts.Items.Count > 0)
+                {
+                    ucFTPAccounts.lbAccounts.SelectedIndex = 0;
+                }
+            }
 
             // Dropbox
 
@@ -327,33 +347,6 @@ namespace ShareX.UploadersLib
             cbDropboxURLType.SelectedIndex = (int)Config.DropboxURLType;
             UpdateDropboxStatus();
 
-            // Copy
-
-            if (OAuthInfo.CheckOAuth(Config.CopyOAuthInfo))
-            {
-                oAuthCopy.Status = OAuthLoginStatus.LoginSuccessful;
-            }
-
-            txtCopyPath.Text = Config.CopyUploadPath;
-            cbCopyURLType.Items.AddRange(Helpers.GetEnumNamesProper<CopyURLType>());
-            cbCopyURLType.SelectedIndex = (int)Config.CopyURLType;
-            UpdateCopyStatus();
-
-            // Google Drive
-
-            if (OAuth2Info.CheckOAuth(Config.GoogleDriveOAuth2Info))
-            {
-                oauth2GoogleDrive.Status = OAuthLoginStatus.LoginSuccessful;
-                btnGoogleDriveRefreshFolders.Enabled = true;
-
-                tvOneDrive.Enabled = true;
-            }
-
-            cbGoogleDriveIsPublic.Checked = Config.GoogleDriveIsPublic;
-            cbGoogleDriveUseFolder.Checked = Config.GoogleDriveUseFolder;
-            txtGoogleDriveFolderID.Enabled = Config.GoogleDriveUseFolder;
-            txtGoogleDriveFolderID.Text = Config.GoogleDriveFolderID;
-
             // OneDrive
 
             tvOneDrive.Nodes.Clear();
@@ -367,6 +360,26 @@ namespace ShareX.UploadersLib
             cbOneDriveCreateShareableLink.Checked = Config.OneDriveAutoCreateShareableLink;
             lblOneDriveFolderID.Text = Resources.UploadersConfigForm_LoadSettings_Selected_folder_ + " " + Config.OneDriveSelectedFolder.name;
             tvOneDrive.CollapseAll();
+
+            // Google Drive
+
+            if (OAuth2Info.CheckOAuth(Config.GoogleDriveOAuth2Info))
+            {
+                oauth2GoogleDrive.Status = OAuthLoginStatus.LoginSuccessful;
+                btnGoogleDriveRefreshFolders.Enabled = true;
+
+                tvOneDrive.Enabled = true;
+            }
+
+            cbGoogleDriveIsPublic.Checked = Config.GoogleDriveIsPublic;
+            cbGoogleDriveDirectLink.Checked = Config.GoogleDriveDirectLink;
+            cbGoogleDriveUseFolder.Checked = Config.GoogleDriveUseFolder;
+            txtGoogleDriveFolderID.Enabled = Config.GoogleDriveUseFolder;
+            txtGoogleDriveFolderID.Text = Config.GoogleDriveFolderID;
+
+            // puush
+
+            txtPuushAPIKey.Text = Config.PuushAPIKey;
 
             // Minus
 
@@ -398,31 +411,18 @@ namespace ShareX.UploadersLib
             txtLocalhostrPassword.Text = Config.LocalhostrPassword;
             cbLocalhostrDirectURL.Checked = Config.LocalhostrDirectURL;
 
-            // FTP
-
-            if (Config.FTPAccountList == null || Config.FTPAccountList.Count == 0)
-            {
-                FTPSetup(new List<FTPAccount>());
-            }
-            else
-            {
-                FTPSetup(Config.FTPAccountList);
-                if (ucFTPAccounts.lbAccounts.Items.Count > 0)
-                {
-                    ucFTPAccounts.lbAccounts.SelectedIndex = 0;
-                }
-            }
-
             // Email
 
             txtEmailSmtpServer.Text = Config.EmailSmtpServer;
             nudEmailSmtpPort.SetValue(Config.EmailSmtpPort);
             txtEmailFrom.Text = Config.EmailFrom;
             txtEmailPassword.Text = Config.EmailPassword;
-            chkEmailConfirm.Checked = Config.EmailConfirmSend;
             cbEmailRememberLastTo.Checked = Config.EmailRememberLastTo;
             txtEmailDefaultSubject.Text = Config.EmailDefaultSubject;
             txtEmailDefaultBody.Text = Config.EmailDefaultBody;
+            cbEmailAutomaticSend.Checked = Config.EmailAutomaticSend;
+            txtEmailAutomaticSendTo.Enabled = Config.EmailAutomaticSend;
+            txtEmailAutomaticSendTo.Text = Config.EmailAutomaticSendTo;
 
             // SendSpace
 
@@ -455,7 +455,7 @@ namespace ShareX.UploadersLib
 
             try
             {
-                txtJiraConfigHelp.Text = string.Format(@"Howto configure your Jira server:
+                txtJiraConfigHelp.Text = string.Format(@"How to configure your Jira server:
 
 - Go to 'Administration' -> 'Add-ons'
 - Select 'Application Links'
@@ -528,7 +528,6 @@ namespace ShareX.UploadersLib
             txtOwnCloudPath.Text = Config.OwnCloudPath;
             cbOwnCloudCreateShare.Checked = Config.OwnCloudCreateShare;
             cbOwnCloudDirectLink.Checked = Config.OwnCloudDirectLink;
-            cbOwnCloudIgnoreInvalidCert.Checked = Config.OwnCloudIgnoreInvalidCert;
             cbOwnCloud81Compatibility.Checked = Config.OwnCloud81Compatibility;
 
             // MediaFire
@@ -538,16 +537,15 @@ namespace ShareX.UploadersLib
             txtMediaFirePath.Text = Config.MediaFirePath;
             cbMediaFireUseLongLink.Checked = Config.MediaFireUseLongLink;
 
-            // Up1
-
-            txtUp1Host.Text = Config.Up1Host;
-            txtUp1Key.Text = Config.Up1Key;
-
             // Lambda
 
             txtLambdaApiKey.Text = Config.LambdaSettings.UserAPIKey;
             cbLambdaUploadURL.Items.AddRange(Lambda.UploadURLs);
             cbLambdaUploadURL.SelectedItem = Config.LambdaSettings.UploadURL;
+
+            // Lithiio
+
+            txtLithiioApiKey.Text = Config.LithiioSettings.UserAPIKey;
 
             // Pomf
 
@@ -576,11 +574,14 @@ namespace ShareX.UploadersLib
             cbStreamableAnonymous.Checked = Config.StreamableAnonymous;
             txtStreamablePassword.Text = Config.StreamablePassword;
             txtStreamableUsername.Text = Config.StreamableUsername;
-            if (Config.StreamableAnonymous)
-            {
-                txtStreamableUsername.Enabled = false;
-                txtStreamablePassword.Enabled = false;
-            }
+            txtStreamableUsername.Enabled = txtStreamablePassword.Enabled = !Config.StreamableAnonymous;
+            cbStreamableUseDirectURL.Checked = Config.StreamableUseDirectURL;
+
+            // Uplea
+            txtUpleaApiKey.Text = Config.UpleaApiKey;
+            txtUpleaEmailAddress.Text = Config.UpleaEmailAddress;
+            cbUpleaInstantDownloadEnabled.Checked = Config.UpleaInstantDownloadEnabled;
+            cbUpleaIsPremium.Checked = Config.UpleaIsPremiumMember;
 
             #endregion File uploaders
 
@@ -1003,6 +1004,31 @@ namespace ShareX.UploadersLib
             }
         }
 
+        private void btnCheveretoTestAll_Click(object sender, EventArgs e)
+        {
+            btnCheveretoTestAll.Enabled = false;
+            btnCheveretoTestAll.Text = "Testing...";
+            string result = null;
+
+            TaskEx.Run(() =>
+            {
+                result = Chevereto.TestUploaders();
+            },
+            () =>
+            {
+                if (!IsDisposed)
+                {
+                    btnCheveretoTestAll.Text = "Test all";
+                    btnCheveretoTestAll.Enabled = true;
+
+                    if (!string.IsNullOrEmpty(result))
+                    {
+                        MessageBox.Show(result, "Chevereto test results", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            });
+        }
+
         private void txtCheveretoWebsite_TextChanged(object sender, EventArgs e)
         {
             Config.CheveretoUploader.UploadURL = txtCheveretoUploadURL.Text;
@@ -1099,6 +1125,11 @@ namespace ShareX.UploadersLib
             Config.PastebinSettings.Title = txtPastebinTitle.Text;
         }
 
+        private void cbPastebinRaw_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.PastebinSettings.RawURL = cbPastebinRaw.Checked;
+        }
+
         #endregion Pastebin
 
         #region Paste.ee
@@ -1135,7 +1166,12 @@ namespace ShareX.UploadersLib
 
         private void chkGistPublishPublic_CheckedChanged(object sender, EventArgs e)
         {
-            Config.GistPublishPublic = ((CheckBox)sender).Checked;
+            Config.GistPublishPublic = cbGistPublishPublic.Checked;
+        }
+
+        private void cbGistUseRawURL_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.GistRawURL = cbGistUseRawURL.Checked;
         }
 
         #endregion Gist
@@ -1166,6 +1202,11 @@ namespace ShareX.UploadersLib
             Config.HastebinSyntaxHighlighting = txtHastebinSyntaxHighlighting.Text;
         }
 
+        private void cbHastebinUseFileExtension_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.HastebinUseFileExtension = cbHastebinUseFileExtension.Checked;
+        }
+
         #endregion Hastebin
 
         #region OneTimeSecret
@@ -1185,348 +1226,6 @@ namespace ShareX.UploadersLib
         #endregion Text Uploaders
 
         #region File Uploaders
-
-        #region Dropbox
-
-        private void pbDropboxLogo_Click(object sender, EventArgs e)
-        {
-            URLHelpers.OpenURL("https://www.dropbox.com");
-        }
-
-        private void oauth2Dropbox_OpenButtonClicked()
-        {
-            DropboxAuthOpen();
-        }
-
-        private void oauth2Dropbox_CompleteButtonClicked(string code)
-        {
-            DropboxAuthComplete(code);
-        }
-
-        private void oauth2Dropbox_ClearButtonClicked()
-        {
-            Config.DropboxOAuth2Info = null;
-        }
-
-        private void txtDropboxPath_TextChanged(object sender, EventArgs e)
-        {
-            Config.DropboxUploadPath = txtDropboxPath.Text;
-            UpdateDropboxStatus();
-        }
-
-        private void btnDropboxShowFiles_Click(object sender, EventArgs e)
-        {
-            DropboxOpenFiles();
-        }
-
-        private void cbDropboxAutoCreateShareableLink_CheckedChanged(object sender, EventArgs e)
-        {
-            Config.DropboxAutoCreateShareableLink = cbDropboxAutoCreateShareableLink.Checked;
-            cbDropboxURLType.Enabled = Config.DropboxAutoCreateShareableLink;
-        }
-
-        private void cbDropboxURLType_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            Config.DropboxURLType = (DropboxURLType)cbDropboxURLType.SelectedIndex;
-        }
-
-        #endregion Dropbox
-
-        #region Copy
-
-        private void pbCopyLogo_Click(object sender, EventArgs e)
-        {
-            URLHelpers.OpenURL("https://copy.com");
-        }
-
-        private void txtCopyPath_TextChanged(object sender, EventArgs e)
-        {
-            Config.CopyUploadPath = txtCopyPath.Text;
-            UpdateCopyStatus();
-        }
-
-        private void oAuthCopy_OpenButtonClicked()
-        {
-            CopyAuthOpen();
-        }
-
-        private void oAuthCopy_CompleteButtonClicked(string code)
-        {
-            CopyAuthComplete(code);
-        }
-
-        private void oAuthCopy_ClearButtonClicked()
-        {
-            Config.CopyOAuthInfo = null;
-        }
-
-        private void cbCopyURLType_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            Config.CopyURLType = (CopyURLType)cbCopyURLType.SelectedIndex;
-        }
-
-        #endregion Copy
-
-        #region OneDrive
-
-        private void oAuth2OneDrive_OpenButtonClicked()
-        {
-            OneDriveAuthOpen();
-        }
-
-        private void oAuth2OneDrive_CompleteButtonClicked(string code)
-        {
-            OneDriveAuthComplete(code);
-        }
-
-        private void oAuth2OneDrive_RefreshButtonClicked()
-        {
-            OneDriveAuthRefresh();
-        }
-
-        private void oAuth2OneDrive_ClearButtonClicked()
-        {
-            Config.OneDriveOAuth2Info = null;
-        }
-
-        private void cbOneDriveCreateShareableLink_CheckedChanged(object sender, EventArgs e)
-        {
-            Config.OneDriveAutoCreateShareableLink = cbOneDriveCreateShareableLink.Checked;
-        }
-
-        private void tvOneDrive_AfterSelect(object sender, TreeViewEventArgs e)
-        {
-            OneDriveFileInfo file = e.Node.Tag as OneDriveFileInfo;
-            if (file != null)
-            {
-                lblOneDriveFolderID.Text = Resources.UploadersConfigForm_LoadSettings_Selected_folder_ + " " + file.name;
-                Config.OneDriveSelectedFolder = file;
-            }
-        }
-
-        private void tvOneDrive_AfterExpand(object sender, TreeViewEventArgs e)
-        {
-            OneDriveFileInfo file = e.Node.Tag as OneDriveFileInfo;
-            if (file != null)
-            {
-                OneDriveListFolders(file, e.Node);
-            }
-        }
-
-        #endregion OneDrive
-
-        #region Google Drive
-
-        private void oauth2GoogleDrive_OpenButtonClicked()
-        {
-            GoogleDriveAuthOpen();
-        }
-
-        private void oauth2GoogleDrive_CompleteButtonClicked(string code)
-        {
-            GoogleDriveAuthComplete(code);
-        }
-
-        private void oauth2GoogleDrive_RefreshButtonClicked()
-        {
-            GoogleDriveAuthRefresh();
-        }
-
-        private void oauth2GoogleDrive_ClearButtonClicked()
-        {
-            Config.GoogleDriveOAuth2Info = null;
-        }
-
-        private void cbGoogleDriveIsPublic_CheckedChanged(object sender, EventArgs e)
-        {
-            Config.GoogleDriveIsPublic = cbGoogleDriveIsPublic.Checked;
-        }
-
-        private void cbGoogleDriveUseFolder_CheckedChanged(object sender, EventArgs e)
-        {
-            Config.GoogleDriveUseFolder = cbGoogleDriveUseFolder.Checked;
-            txtGoogleDriveFolderID.Enabled = Config.GoogleDriveUseFolder;
-        }
-
-        private void txtGoogleDriveFolderID_TextChanged(object sender, EventArgs e)
-        {
-            Config.GoogleDriveFolderID = txtGoogleDriveFolderID.Text;
-        }
-
-        private void btnGoogleDriveRefreshFolders_Click(object sender, EventArgs e)
-        {
-            GoogleDriveRefreshFolders();
-        }
-
-        private void lvGoogleDriveFoldersList_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (lvGoogleDriveFoldersList.SelectedItems.Count > 0)
-            {
-                ListViewItem lvi = lvGoogleDriveFoldersList.SelectedItems[0];
-                var folder = lvi.Tag as GoogleDrive.GoogleDriveFile;
-                if (folder != null)
-                {
-                    txtGoogleDriveFolderID.Text = folder.id;
-                }
-            }
-        }
-
-        #endregion Google Drive
-
-        #region Box
-
-        private void oauth2Box_OpenButtonClicked()
-        {
-            BoxAuthOpen();
-        }
-
-        private void oauth2Box_CompleteButtonClicked(string code)
-        {
-            BoxAuthComplete(code);
-        }
-
-        private void oauth2Box_RefreshButtonClicked()
-        {
-            BoxAuthRefresh();
-        }
-
-        private void oauth2Box_ClearButtonClicked()
-        {
-            Config.BoxOAuth2Info = null;
-        }
-
-        private void cbBoxShare_CheckedChanged(object sender, EventArgs e)
-        {
-            Config.BoxShare = cbBoxShare.Checked;
-        }
-
-        private void btnBoxRefreshFolders_Click(object sender, EventArgs e)
-        {
-            BoxListFolders();
-        }
-
-        private void lvBoxFolders_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (lvBoxFolders.SelectedItems.Count > 0)
-            {
-                ListViewItem lvi = lvBoxFolders.SelectedItems[0];
-                BoxFileEntry file = lvi.Tag as BoxFileEntry;
-                if (file != null)
-                {
-                    lblBoxFolderID.Text = Resources.UploadersConfigForm_LoadSettings_Selected_folder_ + " " + file.name;
-                    Config.BoxSelectedFolder = file;
-                }
-            }
-        }
-
-        private void lvBoxFolders_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left && lvBoxFolders.SelectedItems.Count > 0)
-            {
-                ListViewItem lvi = lvBoxFolders.SelectedItems[0];
-                BoxFileEntry file = lvi.Tag as BoxFileEntry;
-                if (file != null)
-                {
-                    lvBoxFolders.Items.Clear();
-                    BoxListFolders(file);
-                }
-            }
-        }
-
-        #endregion Box
-
-        #region Minus
-
-        private void btnMinusAuth_Click(object sender, EventArgs e)
-        {
-            MinusAuth();
-        }
-
-        private void btnAuthRefresh_Click(object sender, EventArgs e)
-        {
-            MinusAuthRefresh();
-        }
-
-        private void cboMinusFolders_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (Config.MinusConfig != null)
-            {
-                Config.MinusConfig.FolderID = cboMinusFolders.SelectedIndex;
-                MinusFolder tempMf = Config.MinusConfig.GetActiveFolder();
-                chkMinusPublic.Checked = tempMf.is_public;
-            }
-        }
-
-        private void btnMinusFolderAdd_Click(object sender, EventArgs e)
-        {
-            if (!string.IsNullOrEmpty(cboMinusFolders.Text) && !MinusHasFolder(cboMinusFolders.Text))
-            {
-                btnMinusFolderAdd.Enabled = false;
-
-                Minus minus = new Minus(Config.MinusConfig, Config.MinusOAuth2Info);
-                MinusFolder dir = minus.CreateFolder(cboMinusFolders.Text, chkMinusPublic.Checked);
-                if (dir != null)
-                {
-                    cboMinusFolders.Items.Add(dir);
-                    cboMinusFolders.SelectedIndex = cboMinusFolders.Items.Count - 1;
-                }
-
-                btnMinusFolderAdd.Enabled = true;
-            }
-        }
-
-        private void btnMinusFolderRemove_Click(object sender, EventArgs e)
-        {
-            if (!string.IsNullOrEmpty(cboMinusFolders.Text) && MinusHasFolder(cboMinusFolders.Text))
-            {
-                btnMinusFolderRemove.Enabled = false;
-
-                Minus minus = new Minus(Config.MinusConfig, Config.MinusOAuth2Info);
-
-                int index = cboMinusFolders.SelectedIndex;
-
-                if (minus.DeleteFolder(index))
-                {
-                    cboMinusFolders.Items.RemoveAt(index);
-
-                    if (cboMinusFolders.Items.Count > 0)
-                    {
-                        cboMinusFolders.SelectedIndex = 0;
-                    }
-                }
-
-                btnMinusFolderRemove.Enabled = true;
-            }
-        }
-
-        private void btnMinusReadFolderList_Click(object sender, EventArgs e)
-        {
-            if (Config.MinusConfig != null)
-            {
-                btnMinusReadFolderList.Enabled = false;
-
-                List<MinusFolder> tempListMf = new Minus(Config.MinusConfig, Config.MinusOAuth2Info).ReadFolderList();
-
-                if (tempListMf.Count > 0)
-                {
-                    cboMinusFolders.Items.Clear();
-                    cboMinusFolders.Items.AddRange(tempListMf.ToArray());
-                    cboMinusFolders.SelectedIndex = Config.MinusConfig.FolderID;
-                }
-
-                btnMinusReadFolderList.Enabled = true;
-            }
-        }
-
-        private void cbMinusURLType_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (Config.MinusConfig != null)
-            {
-                Config.MinusConfig.LinkType = (MinusLinkType)cbMinusURLType.SelectedIndex;
-            }
-        }
-
-        #endregion Minus
 
         #region FTP
 
@@ -1627,6 +1326,383 @@ namespace ShareX.UploadersLib
 
         #endregion FTP
 
+        #region Dropbox
+
+        private void pbDropboxLogo_Click(object sender, EventArgs e)
+        {
+            URLHelpers.OpenURL("https://www.dropbox.com");
+        }
+
+        private void oauth2Dropbox_OpenButtonClicked()
+        {
+            DropboxAuthOpen();
+        }
+
+        private void oauth2Dropbox_CompleteButtonClicked(string code)
+        {
+            DropboxAuthComplete(code);
+        }
+
+        private void oauth2Dropbox_ClearButtonClicked()
+        {
+            Config.DropboxOAuth2Info = null;
+        }
+
+        private void txtDropboxPath_TextChanged(object sender, EventArgs e)
+        {
+            Config.DropboxUploadPath = txtDropboxPath.Text;
+            UpdateDropboxStatus();
+        }
+
+        private void cbDropboxAutoCreateShareableLink_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.DropboxAutoCreateShareableLink = cbDropboxAutoCreateShareableLink.Checked;
+            cbDropboxURLType.Enabled = Config.DropboxAutoCreateShareableLink;
+        }
+
+        private void cbDropboxURLType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Config.DropboxURLType = (DropboxURLType)cbDropboxURLType.SelectedIndex;
+        }
+
+        #endregion Dropbox
+
+        #region OneDrive
+
+        private void oAuth2OneDrive_OpenButtonClicked()
+        {
+            OneDriveAuthOpen();
+        }
+
+        private void oAuth2OneDrive_CompleteButtonClicked(string code)
+        {
+            OneDriveAuthComplete(code);
+        }
+
+        private void oAuth2OneDrive_RefreshButtonClicked()
+        {
+            OneDriveAuthRefresh();
+        }
+
+        private void oAuth2OneDrive_ClearButtonClicked()
+        {
+            Config.OneDriveOAuth2Info = null;
+        }
+
+        private void cbOneDriveCreateShareableLink_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.OneDriveAutoCreateShareableLink = cbOneDriveCreateShareableLink.Checked;
+        }
+
+        private void tvOneDrive_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            OneDriveFileInfo file = e.Node.Tag as OneDriveFileInfo;
+            if (file != null)
+            {
+                lblOneDriveFolderID.Text = Resources.UploadersConfigForm_LoadSettings_Selected_folder_ + " " + file.name;
+                Config.OneDriveSelectedFolder = file;
+            }
+        }
+
+        private void tvOneDrive_AfterExpand(object sender, TreeViewEventArgs e)
+        {
+            OneDriveFileInfo file = e.Node.Tag as OneDriveFileInfo;
+            if (file != null)
+            {
+                OneDriveListFolders(file, e.Node);
+            }
+        }
+
+        #endregion OneDrive
+
+        #region Google Drive
+
+        private void oauth2GoogleDrive_OpenButtonClicked()
+        {
+            GoogleDriveAuthOpen();
+        }
+
+        private void oauth2GoogleDrive_CompleteButtonClicked(string code)
+        {
+            GoogleDriveAuthComplete(code);
+        }
+
+        private void oauth2GoogleDrive_RefreshButtonClicked()
+        {
+            GoogleDriveAuthRefresh();
+        }
+
+        private void oauth2GoogleDrive_ClearButtonClicked()
+        {
+            Config.GoogleDriveOAuth2Info = null;
+        }
+
+        private void cbGoogleDriveIsPublic_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.GoogleDriveIsPublic = cbGoogleDriveIsPublic.Checked;
+        }
+
+        private void cbGoogleDriveDirectLink_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.GoogleDriveDirectLink = cbGoogleDriveDirectLink.Checked;
+        }
+
+        private void cbGoogleDriveUseFolder_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.GoogleDriveUseFolder = cbGoogleDriveUseFolder.Checked;
+            txtGoogleDriveFolderID.Enabled = Config.GoogleDriveUseFolder;
+        }
+
+        private void txtGoogleDriveFolderID_TextChanged(object sender, EventArgs e)
+        {
+            Config.GoogleDriveFolderID = txtGoogleDriveFolderID.Text;
+        }
+
+        private void btnGoogleDriveRefreshFolders_Click(object sender, EventArgs e)
+        {
+            GoogleDriveRefreshFolders();
+        }
+
+        private void lvGoogleDriveFoldersList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (lvGoogleDriveFoldersList.SelectedItems.Count > 0)
+            {
+                ListViewItem lvi = lvGoogleDriveFoldersList.SelectedItems[0];
+                GoogleDriveFile folder = lvi.Tag as GoogleDriveFile;
+                if (folder != null)
+                {
+                    txtGoogleDriveFolderID.Text = folder.id;
+                }
+            }
+        }
+
+        #endregion Google Drive
+
+        #region puush
+
+        private bool PuushValidationCheck()
+        {
+            bool result = true;
+
+            if (string.IsNullOrEmpty(txtPuushEmail.Text))
+            {
+                txtPuushEmail.BackColor = Color.FromArgb(255, 200, 200);
+                result = false;
+            }
+            else
+            {
+                txtPuushEmail.BackColor = SystemColors.Window;
+            }
+
+            if (string.IsNullOrEmpty(txtPuushPassword.Text))
+            {
+                txtPuushPassword.BackColor = Color.FromArgb(255, 200, 200);
+                result = false;
+            }
+            else
+            {
+                txtPuushPassword.BackColor = SystemColors.Window;
+            }
+
+            return result;
+        }
+
+        private void pbPuush_Click(object sender, EventArgs e)
+        {
+            URLHelpers.OpenURL(Puush.PuushURL);
+        }
+
+        private void llPuushCreateAccount_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            URLHelpers.OpenURL(Puush.PuushRegisterURL);
+        }
+
+        private void llPuushForgottenPassword_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            URLHelpers.OpenURL(Puush.PuushResetPasswordURL);
+        }
+
+        private void btnPuushLogin_Click(object sender, EventArgs e)
+        {
+            if (PuushValidationCheck())
+            {
+                txtPuushAPIKey.Text = "";
+
+                string apiKey = new Puush().Login(txtPuushEmail.Text, txtPuushPassword.Text);
+
+                if (!string.IsNullOrEmpty(apiKey))
+                {
+                    txtPuushAPIKey.Text = apiKey;
+                }
+                else
+                {
+                    MessageBox.Show("Login failed.", "Authentication failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void txtPuushAPIKey_TextChanged(object sender, EventArgs e)
+        {
+            Config.PuushAPIKey = txtPuushAPIKey.Text;
+        }
+
+        #endregion puush
+
+        #region Box
+
+        private void oauth2Box_OpenButtonClicked()
+        {
+            BoxAuthOpen();
+        }
+
+        private void oauth2Box_CompleteButtonClicked(string code)
+        {
+            BoxAuthComplete(code);
+        }
+
+        private void oauth2Box_RefreshButtonClicked()
+        {
+            BoxAuthRefresh();
+        }
+
+        private void oauth2Box_ClearButtonClicked()
+        {
+            Config.BoxOAuth2Info = null;
+        }
+
+        private void cbBoxShare_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.BoxShare = cbBoxShare.Checked;
+        }
+
+        private void btnBoxRefreshFolders_Click(object sender, EventArgs e)
+        {
+            BoxListFolders();
+        }
+
+        private void lvBoxFolders_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (lvBoxFolders.SelectedItems.Count > 0)
+            {
+                ListViewItem lvi = lvBoxFolders.SelectedItems[0];
+                BoxFileEntry file = lvi.Tag as BoxFileEntry;
+                if (file != null)
+                {
+                    lblBoxFolderID.Text = Resources.UploadersConfigForm_LoadSettings_Selected_folder_ + " " + file.name;
+                    Config.BoxSelectedFolder = file;
+                }
+            }
+        }
+
+        private void lvBoxFolders_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left && lvBoxFolders.SelectedItems.Count > 0)
+            {
+                ListViewItem lvi = lvBoxFolders.SelectedItems[0];
+                BoxFileEntry file = lvi.Tag as BoxFileEntry;
+                if (file != null)
+                {
+                    lvBoxFolders.Items.Clear();
+                    BoxListFolders(file);
+                }
+            }
+        }
+
+        #endregion Box
+
+        #region Minus
+
+        private void btnMinusAuth_Click(object sender, EventArgs e)
+        {
+            MinusAuth();
+        }
+
+        private void btnAuthRefresh_Click(object sender, EventArgs e)
+        {
+            MinusAuthRefresh();
+        }
+
+        private void cboMinusFolders_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (Config.MinusConfig != null)
+            {
+                Config.MinusConfig.FolderID = cboMinusFolders.SelectedIndex;
+                MinusFolder tempMf = Config.MinusConfig.GetActiveFolder();
+                cbMinusPublic.Checked = tempMf.is_public;
+            }
+        }
+
+        private void btnMinusFolderAdd_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(cboMinusFolders.Text) && !MinusHasFolder(cboMinusFolders.Text))
+            {
+                btnMinusFolderAdd.Enabled = false;
+
+                Minus minus = new Minus(Config.MinusConfig, Config.MinusOAuth2Info);
+                MinusFolder dir = minus.CreateFolder(cboMinusFolders.Text, cbMinusPublic.Checked);
+                if (dir != null)
+                {
+                    cboMinusFolders.Items.Add(dir);
+                    cboMinusFolders.SelectedIndex = cboMinusFolders.Items.Count - 1;
+                }
+
+                btnMinusFolderAdd.Enabled = true;
+            }
+        }
+
+        private void btnMinusFolderRemove_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrEmpty(cboMinusFolders.Text) && MinusHasFolder(cboMinusFolders.Text))
+            {
+                btnMinusFolderRemove.Enabled = false;
+
+                Minus minus = new Minus(Config.MinusConfig, Config.MinusOAuth2Info);
+
+                int index = cboMinusFolders.SelectedIndex;
+
+                if (minus.DeleteFolder(index))
+                {
+                    cboMinusFolders.Items.RemoveAt(index);
+
+                    if (cboMinusFolders.Items.Count > 0)
+                    {
+                        cboMinusFolders.SelectedIndex = 0;
+                    }
+                }
+
+                btnMinusFolderRemove.Enabled = true;
+            }
+        }
+
+        private void btnMinusReadFolderList_Click(object sender, EventArgs e)
+        {
+            if (Config.MinusConfig != null)
+            {
+                btnMinusReadFolderList.Enabled = false;
+
+                List<MinusFolder> tempListMf = new Minus(Config.MinusConfig, Config.MinusOAuth2Info).ReadFolderList();
+
+                if (tempListMf.Count > 0)
+                {
+                    cboMinusFolders.Items.Clear();
+                    cboMinusFolders.Items.AddRange(tempListMf.ToArray());
+                    cboMinusFolders.SelectedIndex = Config.MinusConfig.FolderID;
+                }
+
+                btnMinusReadFolderList.Enabled = true;
+            }
+        }
+
+        private void cbMinusURLType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (Config.MinusConfig != null)
+            {
+                Config.MinusConfig.LinkType = (MinusLinkType)cbMinusURLType.SelectedIndex;
+            }
+        }
+
+        #endregion Minus
+
         #region Email
 
         private void txtSmtpServer_TextChanged(object sender, EventArgs e)
@@ -1649,11 +1725,6 @@ namespace ShareX.UploadersLib
             Config.EmailPassword = txtEmailPassword.Text;
         }
 
-        private void chkEmailConfirm_CheckedChanged(object sender, EventArgs e)
-        {
-            Config.EmailConfirmSend = chkEmailConfirm.Checked;
-        }
-
         private void cbRememberLastToEmail_CheckedChanged(object sender, EventArgs e)
         {
             Config.EmailRememberLastTo = cbEmailRememberLastTo.Checked;
@@ -1667,6 +1738,17 @@ namespace ShareX.UploadersLib
         private void txtDefaultBody_TextChanged(object sender, EventArgs e)
         {
             Config.EmailDefaultBody = txtEmailDefaultBody.Text;
+        }
+
+        private void cbEmailAutomaticSend_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.EmailAutomaticSend = cbEmailAutomaticSend.Checked;
+            txtEmailAutomaticSendTo.Enabled = Config.EmailAutomaticSend;
+        }
+
+        private void txtEmailAutomaticSendTo_TextChanged(object sender, EventArgs e)
+        {
+            Config.EmailAutomaticSendTo = txtEmailAutomaticSendTo.Text;
         }
 
         #endregion Email
@@ -1868,7 +1950,7 @@ namespace ShareX.UploadersLib
 
         private void cbAmazonS3Endpoint_SelectionChangeCommitted(object sender, EventArgs e)
         {
-            var region = cbAmazonS3Endpoint.SelectedItem as AmazonS3Region;
+            AmazonS3Region region = cbAmazonS3Endpoint.SelectedItem as AmazonS3Region;
             if (region != null)
             {
                 Config.AmazonS3Settings.Endpoint = region.Identifier;
@@ -1946,31 +2028,12 @@ namespace ShareX.UploadersLib
             Config.OwnCloudDirectLink = cbOwnCloudDirectLink.Checked;
         }
 
-        private void cbOwnCloudIgnoreInvalidCert_CheckedChanged(object sender, EventArgs e)
-        {
-            Config.OwnCloudIgnoreInvalidCert = cbOwnCloudIgnoreInvalidCert.Checked;
-        }
-
         private void cbOwnCloud81Compatibility_CheckedChanged(object sender, EventArgs e)
         {
             Config.OwnCloud81Compatibility = cbOwnCloud81Compatibility.Checked;
         }
 
         #endregion ownCloud
-
-        #region Up1
-
-        private void txtUp1Host_TextChanged(object sender, EventArgs e)
-        {
-            Config.Up1Host = txtUp1Host.Text;
-        }
-
-        private void txtUp1Key_TextChanged(object sender, EventArgs e)
-        {
-            Config.Up1Key = txtUp1Key.Text;
-        }
-
-        #endregion Up1
 
         #region Pushbullet
 
@@ -2127,6 +2190,20 @@ namespace ShareX.UploadersLib
 
         #endregion Lambda
 
+        #region Lithiio
+
+        private void btnLithiioGetAPIKey_Click(object sender, EventArgs e)
+        {
+            URLHelpers.OpenURL("https://lithi.io/");
+        }
+
+        private void txtLithiioApiKey_TextChanged(object sender, EventArgs e)
+        {
+            Config.LithiioSettings.UserAPIKey = txtLithiioApiKey.Text;
+        }
+
+        #endregion Lithiio
+
         #region Pomf
 
         private void cbPomfUploaders_SelectedIndexChanged(object sender, EventArgs e)
@@ -2151,7 +2228,7 @@ namespace ShareX.UploadersLib
 
             TaskEx.Run(() =>
             {
-                result = Pomf.TestClones();
+                result = Pomf.TestUploaders();
             },
             () =>
             {
@@ -2162,7 +2239,7 @@ namespace ShareX.UploadersLib
 
                     if (!string.IsNullOrEmpty(result))
                     {
-                        MessageBox.Show(result, "Pomf test results", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        Debug.WriteLine("Pomf test results:\r\n\r\n" + result);
                     }
                 }
             });
@@ -2303,7 +2380,7 @@ namespace ShareX.UploadersLib
             }
 
             Seafile sf = new Seafile(cbSeafileAPIURL.Text, txtSeafileAuthToken.Text, null);
-            Seafile.SeafileCheckAccInfoResponse SeafileCheckAccInfoResponse = sf.GetAccountInfo();
+            SeafileCheckAccInfoResponse SeafileCheckAccInfoResponse = sf.GetAccountInfo();
 
             if (SeafileCheckAccInfoResponse == null)
             {
@@ -2323,9 +2400,9 @@ namespace ShareX.UploadersLib
             lvSeafileLibraries.Items.Clear();
 
             Seafile sf = new Seafile(cbSeafileAPIURL.Text, txtSeafileAuthToken.Text, null);
-            List<Seafile.SeafileLibraryObj> SeafileLibraries = sf.GetLibraries();
+            List<SeafileLibraryObj> SeafileLibraries = sf.GetLibraries();
 
-            foreach (var SeafileLibrary in SeafileLibraries)
+            foreach (SeafileLibraryObj SeafileLibrary in SeafileLibraries)
             {
                 if (SeafileLibrary.permission == "rw")
                 {
@@ -2352,7 +2429,7 @@ namespace ShareX.UploadersLib
             {
                 ListViewItem selectedItem = lvSeafileLibraries.Items[selIndex];
                 Config.SeafileRepoID = selectedItem.Name;
-                Seafile.SeafileLibraryObj SealileLibraryInfo = (Seafile.SeafileLibraryObj)selectedItem.Tag;
+                SeafileLibraryObj SealileLibraryInfo = (SeafileLibraryObj)selectedItem.Tag;
                 if (SealileLibraryInfo.encrypted)
                 {
                     Config.SeafileIsLibraryEncrypted = true;
@@ -2454,7 +2531,77 @@ namespace ShareX.UploadersLib
             Config.StreamablePassword = txtStreamablePassword.Text;
         }
 
+        private void cbStreamableUseDirectURL_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.StreamableUseDirectURL = cbStreamableUseDirectURL.Checked;
+        }
+
         #endregion Streamable
+
+        #region Uplea
+
+        private void btnUpleaLogin_Click(object sender, EventArgs e)
+        {
+            btnUpleaLogin.Enabled = false;
+
+            Uplea uplea = new Uplea();
+
+            txtUpleaApiKey.Text = "";
+            cbUpleaIsPremium.Checked = false;
+            cbUpleaInstantDownloadEnabled.Checked = false;
+
+            try
+            {
+                string apiKey = uplea.GetApiKey(txtUpleaUsername.Text, txtUpleaPassword.Text);
+
+                txtUpleaApiKey.Text = apiKey;
+
+                if (!string.IsNullOrEmpty(apiKey))
+                {
+                    UpleaGetUserInformationResponse upleaUserInformation = uplea.GetUserInformation(apiKey);
+                    txtUpleaEmailAddress.Text = upleaUserInformation.Result.EmailAddress;
+                    cbUpleaIsPremium.Checked = upleaUserInformation.Result.IsPremiumMember;
+                    cbUpleaInstantDownloadEnabled.Checked = upleaUserInformation.Result.InstantDownloadEnabled;
+                }
+                else
+                {
+                    MessageBox.Show("Unable to retrieve API key and user details from Uplea. Please check your user credentials and try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            finally
+            {
+                btnUpleaLogin.Enabled = true;
+            }
+        }
+
+        private void txtUpleaApiKey_TextChanged(object sender, EventArgs e)
+        {
+            Config.UpleaApiKey = txtUpleaApiKey.Text;
+
+            if (string.IsNullOrEmpty(Config.UpleaApiKey))
+            {
+                txtUpleaEmailAddress.Text = "";
+                cbUpleaIsPremium.Checked = false;
+                cbUpleaInstantDownloadEnabled.Checked = false;
+            }
+        }
+
+        private void txtUpleaEmailAddress_TextChanged(object sender, EventArgs e)
+        {
+            Config.UpleaEmailAddress = txtUpleaEmailAddress.Text;
+        }
+
+        private void cbUpleaIsPremium_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.UpleaIsPremiumMember = cbUpleaIsPremium.Checked;
+        }
+
+        private void cbUpleaInstantDownloadEnabled_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.UpleaInstantDownloadEnabled = cbUpleaInstantDownloadEnabled.Checked;
+        }
+
+        #endregion Uplea
 
         #endregion File Uploaders
 
@@ -2716,7 +2863,7 @@ namespace ShareX.UploadersLib
 
         private void btnCustomUploaderClearUploaders_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("Remove all custom uploaders?", "ShareX", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (MessageBox.Show(Resources.UploadersConfigForm_Remove_all_custom_uploaders_Confirmation, "ShareX", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 CustomUploaderClearUploaders();
             }
@@ -2739,7 +2886,7 @@ namespace ShareX.UploadersLib
             if (!string.IsNullOrEmpty(regexp))
             {
                 lvCustomUploaderRegexps.Items.Add(regexp);
-                txtCustomUploaderRegexp.Text = string.Empty;
+                txtCustomUploaderRegexp.Text = "";
                 txtCustomUploaderRegexp.Focus();
             }
         }
@@ -2769,7 +2916,7 @@ namespace ShareX.UploadersLib
 
         private void lvCustomUploaderRegexps_SelectedIndexChanged(object sender, EventArgs e)
         {
-            string regex = string.Empty;
+            string regex = "";
 
             if (lvCustomUploaderRegexps.SelectedItems.Count > 0)
             {
@@ -2863,24 +3010,24 @@ namespace ShareX.UploadersLib
 
         private void txtCustomUploaderURL_Enter(object sender, EventArgs e)
         {
-            urlType = URLType.URL;
+            customUploaderURLType = URLType.URL;
         }
 
         private void txtCustomUploaderThumbnailURL_Enter(object sender, EventArgs e)
         {
-            urlType = URLType.ThumbnailURL;
+            customUploaderURLType = URLType.ThumbnailURL;
         }
 
         private void txtCustomUploaderDeletionURL_Enter(object sender, EventArgs e)
         {
-            urlType = URLType.DeletionURL;
+            customUploaderURLType = URLType.DeletionURL;
         }
 
         private void AddTextToActiveURLField(string text)
         {
             TextBox tb;
 
-            switch (urlType)
+            switch (customUploaderURLType)
             {
                 default:
                 case URLType.URL:
@@ -2905,8 +3052,8 @@ namespace ShareX.UploadersLib
             {
                 string value = txtCustomUploaderArgValue.Text;
                 lvCustomUploaderArguments.Items.Add(name).SubItems.Add(value);
-                txtCustomUploaderArgName.Text = string.Empty;
-                txtCustomUploaderArgValue.Text = string.Empty;
+                txtCustomUploaderArgName.Text = "";
+                txtCustomUploaderArgValue.Text = "";
                 txtCustomUploaderArgName.Focus();
             }
         }
@@ -2936,8 +3083,8 @@ namespace ShareX.UploadersLib
 
         private void lvCustomUploaderArguments_SelectedIndexChanged(object sender, EventArgs e)
         {
-            string name = string.Empty;
-            string value = string.Empty;
+            string name = "";
+            string value = "";
 
             if (lvCustomUploaderArguments.SelectedItems.Count > 0)
             {
@@ -2957,8 +3104,8 @@ namespace ShareX.UploadersLib
             {
                 string value = txtCustomUploaderHeaderValue.Text;
                 lvCustomUploaderHeaders.Items.Add(name).SubItems.Add(value);
-                txtCustomUploaderHeaderName.Text = string.Empty;
-                txtCustomUploaderHeaderValue.Text = string.Empty;
+                txtCustomUploaderHeaderName.Text = "";
+                txtCustomUploaderHeaderValue.Text = "";
                 txtCustomUploaderHeaderName.Focus();
             }
         }
@@ -2988,8 +3135,8 @@ namespace ShareX.UploadersLib
 
         private void lvCustomUploaderHeaders_SelectedIndexChanged(object sender, EventArgs e)
         {
-            string name = string.Empty;
-            string value = string.Empty;
+            string name = "";
+            string value = "";
 
             if (lvCustomUploaderHeaders.SelectedItems.Count > 0)
             {

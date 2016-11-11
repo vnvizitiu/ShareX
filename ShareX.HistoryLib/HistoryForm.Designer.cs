@@ -39,8 +39,8 @@
             this.chURL = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.pbThumbnail = new ShareX.HelpersLib.MyPictureBox();
             this.gbFilters = new System.Windows.Forms.GroupBox();
+            this.cbHostFilterSelection = new System.Windows.Forms.ComboBox();
             this.btnRemoveFilters = new System.Windows.Forms.Button();
-            this.txtHostFilter = new System.Windows.Forms.TextBox();
             this.cbTypeFilterSelection = new System.Windows.Forms.ComboBox();
             this.cbHostFilter = new System.Windows.Forms.CheckBox();
             this.cbTypeFilter = new System.Windows.Forms.CheckBox();
@@ -123,18 +123,18 @@
             // pbThumbnail
             // 
             resources.ApplyResources(this.pbThumbnail, "pbThumbnail");
-            this.pbThumbnail.BackColor = System.Drawing.Color.White;
             this.pbThumbnail.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pbThumbnail.DrawCheckeredBackground = true;
             this.pbThumbnail.FullscreenOnClick = true;
             this.pbThumbnail.Name = "pbThumbnail";
+            this.pbThumbnail.ShowImageSizeLabel = true;
             // 
             // gbFilters
             // 
             resources.ApplyResources(this.gbFilters, "gbFilters");
+            this.gbFilters.Controls.Add(this.cbHostFilterSelection);
             this.gbFilters.Controls.Add(this.btnRemoveFilters);
             this.gbFilters.Controls.Add(this.btnApplyFilters);
-            this.gbFilters.Controls.Add(this.txtHostFilter);
             this.gbFilters.Controls.Add(this.cbTypeFilterSelection);
             this.gbFilters.Controls.Add(this.cbHostFilter);
             this.gbFilters.Controls.Add(this.cbTypeFilter);
@@ -149,6 +149,12 @@
             this.gbFilters.Name = "gbFilters";
             this.gbFilters.TabStop = false;
             // 
+            // cbHostFilterSelection
+            // 
+            this.cbHostFilterSelection.FormattingEnabled = true;
+            resources.ApplyResources(this.cbHostFilterSelection, "cbHostFilterSelection");
+            this.cbHostFilterSelection.Name = "cbHostFilterSelection";
+            // 
             // btnRemoveFilters
             // 
             resources.ApplyResources(this.btnRemoveFilters, "btnRemoveFilters");
@@ -156,20 +162,10 @@
             this.btnRemoveFilters.UseVisualStyleBackColor = true;
             this.btnRemoveFilters.Click += new System.EventHandler(this.btnRemoveFilters_Click);
             // 
-            // txtHostFilter
-            // 
-            resources.ApplyResources(this.txtHostFilter, "txtHostFilter");
-            this.txtHostFilter.Name = "txtHostFilter";
-            // 
             // cbTypeFilterSelection
             // 
             this.cbTypeFilterSelection.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbTypeFilterSelection.FormattingEnabled = true;
-            this.cbTypeFilterSelection.Items.AddRange(new object[] {
-            resources.GetString("cbTypeFilterSelection.Items"),
-            resources.GetString("cbTypeFilterSelection.Items1"),
-            resources.GetString("cbTypeFilterSelection.Items2"),
-            resources.GetString("cbTypeFilterSelection.Items3")});
             resources.ApplyResources(this.cbTypeFilterSelection, "cbTypeFilterSelection");
             this.cbTypeFilterSelection.Name = "cbTypeFilterSelection";
             // 
@@ -240,6 +236,7 @@
             this.AcceptButton = this.btnApplyFilters;
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.SystemColors.Window;
             this.Controls.Add(this.scMain);
             this.KeyPreview = true;
             this.Name = "HistoryForm";
@@ -277,8 +274,8 @@
         private System.Windows.Forms.ComboBox cbTypeFilterSelection;
         private System.Windows.Forms.CheckBox cbHostFilter;
         private System.Windows.Forms.CheckBox cbTypeFilter;
-        private System.Windows.Forms.TextBox txtHostFilter;
         private System.Windows.Forms.ColumnHeader chIcon;
         private ShareX.HelpersLib.SplitContainerCustomSplitter scMain;
+        private System.Windows.Forms.ComboBox cbHostFilterSelection;
     }
 }

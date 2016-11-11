@@ -82,7 +82,7 @@ namespace ShareX.HelpersLib
             ListViewItem lvi = new ListViewItem();
             lvi.Text = string.Format(" {0:0.##}%", gradientStop.Location);
             lvi.BackColor = gradientStop.Color;
-            lvi.ForeColor = ColorHelpers.VisibleTextColor(gradientStop.Color);
+            lvi.ForeColor = ColorHelpers.VisibleColor(gradientStop.Color);
             lvi.Tag = gradientStop;
             lvGradientPoints.Items.Add(lvi);
         }
@@ -117,7 +117,7 @@ namespace ShareX.HelpersLib
                 GradientStop gradientStop = (GradientStop)lvi.Tag;
                 gradientStop.Color = color;
                 lvi.BackColor = gradientStop.Color;
-                lvi.ForeColor = ColorHelpers.VisibleTextColor(gradientStop.Color);
+                lvi.ForeColor = ColorHelpers.VisibleColor(gradientStop.Color);
                 UpdatePreview();
             }
         }
@@ -156,11 +156,13 @@ namespace ShareX.HelpersLib
         private void btnOK_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.OK;
+            Close();
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.Cancel;
+            Close();
         }
     }
 }

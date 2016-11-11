@@ -51,7 +51,7 @@ namespace ShareX.UploadersLib
             InitializeComponent();
             Icon = ShareXResources.Icon;
 
-            lblStatus.Text = string.Empty;
+            lblStatus.Text = "";
             lvFTPList.SubItemEndEditing += lvFTPList_SubItemEndEditing;
 
             FtpTrace.AddListener(new TextBoxTraceListener(txtDebug));
@@ -139,7 +139,7 @@ namespace ShareX.UploadersLib
                     }
                     else
                     {
-                        lvi.SubItems.Add(string.Empty);
+                        lvi.SubItems.Add("");
                     }
 
                     lvi.SubItems.Add(IconReader.GetDisplayName(file.Name, file.Type == FtpFileSystemObjectType.Directory));
@@ -215,7 +215,7 @@ namespace ShareX.UploadersLib
                 }
             }
 
-            string isSelected = selected ? "Selected " : string.Empty;
+            string isSelected = selected ? "Selected " : "";
             int filesCount = items.Count(x => x.Type == FtpFileSystemObjectType.File);
             string file = filesCount > 1 ? "files" : "file";
             int directoriesCount = items.Count(x => x.Type == FtpFileSystemObjectType.Directory);
@@ -295,7 +295,7 @@ namespace ShareX.UploadersLib
             using (InputBox ib = new InputBox(Resources.FTPClientForm_FTPCreateDirectory_Directory_name_to_create))
             {
                 ib.ShowDialog();
-                this.ShowActivate();
+                this.ForceActivate();
                 if (ib.DialogResult == DialogResult.OK)
                 {
                     Client.CreateDirectory(URLHelpers.CombineURL(currentDirectory, ib.InputText));
@@ -436,7 +436,7 @@ namespace ShareX.UploadersLib
                                 if (file.Name != filename)
                                 {
                                     string path = URLHelpers.CombineURL(currentDirectory, filename);
-                                    string movePath = string.Empty;
+                                    string movePath = "";
                                     if (file.Type == FtpFileSystemObjectType.Link)
                                     {
                                         if (file.Name == ".")
@@ -509,8 +509,8 @@ namespace ShareX.UploadersLib
                 }
             }
 
-            downloadToolStripMenuItem.Enabled = renameToolStripMenuItem.Enabled = deleteToolStripMenuItem.Enabled =
-                copyURLsToClipboardToolStripMenuItem.Enabled = openURLToolStripMenuItem.Enabled = enabled;
+            tsmiDownload.Enabled = tsmiRename.Enabled = tsmiDelete.Enabled =
+                tsmiCopyURL.Enabled = tsmiOpenURL.Enabled = enabled;
 
             CheckFiles(lvFTPList.SelectedItems.Count > 0);
         }

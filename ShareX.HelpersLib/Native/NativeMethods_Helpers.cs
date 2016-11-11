@@ -122,15 +122,15 @@ namespace ShareX.HelpersLib
         {
             IntPtr iconHandle;
 
-            SendMessageTimeout(handle, (int)WindowsMessages.GETICON, ICON_SMALL2, 0, SendMessageTimeoutFlags.SMTO_ABORTIFHUNG, 1000, out iconHandle);
+            SendMessageTimeout(handle, (int)WindowsMessages.GETICON, NativeConstants.ICON_SMALL2, 0, SendMessageTimeoutFlags.SMTO_ABORTIFHUNG, 1000, out iconHandle);
 
             if (iconHandle == IntPtr.Zero)
             {
-                SendMessageTimeout(handle, (int)WindowsMessages.GETICON, ICON_SMALL, 0, SendMessageTimeoutFlags.SMTO_ABORTIFHUNG, 1000, out iconHandle);
+                SendMessageTimeout(handle, (int)WindowsMessages.GETICON, NativeConstants.ICON_SMALL, 0, SendMessageTimeoutFlags.SMTO_ABORTIFHUNG, 1000, out iconHandle);
 
                 if (iconHandle == IntPtr.Zero)
                 {
-                    iconHandle = GetClassLongPtrSafe(handle, GCL_HICONSM);
+                    iconHandle = GetClassLongPtrSafe(handle, NativeConstants.GCL_HICONSM);
 
                     if (iconHandle == IntPtr.Zero)
                     {
@@ -151,11 +151,11 @@ namespace ShareX.HelpersLib
         {
             IntPtr iconHandle;
 
-            SendMessageTimeout(handle, (int)WindowsMessages.GETICON, ICON_BIG, 0, SendMessageTimeoutFlags.SMTO_ABORTIFHUNG, 1000, out iconHandle);
+            SendMessageTimeout(handle, (int)WindowsMessages.GETICON, NativeConstants.ICON_BIG, 0, SendMessageTimeoutFlags.SMTO_ABORTIFHUNG, 1000, out iconHandle);
 
             if (iconHandle == IntPtr.Zero)
             {
-                iconHandle = GetClassLongPtrSafe(handle, GCL_HICON);
+                iconHandle = GetClassLongPtrSafe(handle, NativeConstants.GCL_HICON);
             }
 
             if (iconHandle != IntPtr.Zero)
@@ -349,6 +349,18 @@ namespace ShareX.HelpersLib
             return wp.showCmd == WindowShowStyle.Maximize;
         }
 
+        public static bool IsWindowCloaked(IntPtr handle)
+        {
+            if (IsDWMEnabled())
+            {
+                int cloaked;
+                int result = DwmGetWindowAttribute(handle, (int)DwmWindowAttribute.Cloaked, out cloaked, sizeof(int));
+                return result == 0 && cloaked != 0;
+            }
+
+            return false;
+        }
+
         public static IntPtr SetHook(int hookType, HookProc hookProc)
         {
             using (Process currentProcess = Process.GetCurrentProcess())
@@ -475,6 +487,20 @@ namespace ShareX.HelpersLib
             fInfo.dwTimeout = 0;
 
             return FlashWindowEx(ref fInfo);
+        }
+
+        public static void OpenFolderAndSelectFile(string filePath)
+        {
+            IntPtr pidl = ILCreateFromPathW(filePath);
+
+            try
+            {
+                SHOpenFolderAndSelectItems(pidl, 0, IntPtr.Zero, 0);
+            }
+            finally
+            {
+                ILFree(pidl);
+            }
         }
     }
 }

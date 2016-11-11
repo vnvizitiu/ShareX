@@ -107,17 +107,18 @@ namespace ShareX
 
             if (!rect.IsEmpty)
             {
-                Image img = Screenshot.CaptureRectangle(rect);
+                TaskSettings taskSettings = TaskSettings.GetDefaultTaskSettings();
+
+                Image img = TaskHelpers.GetScreenshot(taskSettings).CaptureRectangle(rect);
 
                 if (img != null)
                 {
-                    TaskSettings taskSettings = TaskSettings.GetDefaultTaskSettings();
                     taskSettings.UseDefaultAfterCaptureJob = false;
                     taskSettings.AfterCaptureJob = taskSettings.AfterCaptureJob.Remove(AfterCaptureTasks.AnnotateImage);
                     taskSettings.UseDefaultAdvancedSettings = false;
                     taskSettings.AdvancedSettings.DisableNotifications = true;
 
-                    UploadManager.RunImageTask(img, taskSettings);
+                    UploadManager.RunImageTask(img, taskSettings, true, true);
                 }
             }
         }
@@ -126,7 +127,7 @@ namespace ShareX
         {
             Rectangle rect;
 
-            if (TaskHelpers.SelectRegion(out rect, taskSettings))
+            if (RegionCaptureTasks.GetRectangleRegion(out rect, taskSettings.CaptureSettings.SurfaceOptions))
             {
                 Program.Settings.AutoCaptureRegion = rect;
                 UpdateRegion();
@@ -250,7 +251,7 @@ namespace ShareX
         private void niTray_MouseClick(object sender, MouseEventArgs e)
         {
             niTray.Visible = false;
-            this.ShowActivate();
+            this.ForceActivate();
         }
     }
 }

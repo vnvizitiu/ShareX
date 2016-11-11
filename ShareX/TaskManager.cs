@@ -26,6 +26,7 @@
 using ShareX.HelpersLib;
 using ShareX.HistoryLib;
 using ShareX.Properties;
+using ShareX.UploadersLib;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -65,6 +66,8 @@ namespace ShareX
                     task.UploadStarted += task_UploadStarted;
                     task.UploadProgressChanged += task_UploadProgressChanged;
                     task.UploadCompleted += task_UploadCompleted;
+                    task.TaskCompleted += task_TaskCompleted;
+                    task.UploadersConfigWindowRequested += Task_UploadersConfigWindowRequested;
                 }
 
                 CreateListViewItem(task);
@@ -181,19 +184,18 @@ namespace ShareX
 
                 if (task.Status == TaskStatus.History)
                 {
-                    // TODO: Translate
-                    lvi.SubItems.Add("History");
-                    lvi.SubItems.Add(task.Info.UploadTime.ToString());
+                    lvi.SubItems.Add(Resources.TaskManager_CreateListViewItem_History);
+                    lvi.SubItems.Add(task.Info.TaskEndTime.ToString());
                 }
                 else
                 {
                     lvi.SubItems.Add(Resources.TaskManager_CreateListViewItem_In_queue);
-                    lvi.SubItems.Add(string.Empty);
+                    lvi.SubItems.Add("");
                 }
 
-                lvi.SubItems.Add(string.Empty);
-                lvi.SubItems.Add(string.Empty);
-                lvi.SubItems.Add(string.Empty);
+                lvi.SubItems.Add("");
+                lvi.SubItems.Add("");
+                lvi.SubItems.Add("");
 
                 if (task.Status == TaskStatus.History)
                 {
@@ -202,7 +204,7 @@ namespace ShareX
                 }
                 else
                 {
-                    lvi.SubItems.Add(string.Empty);
+                    lvi.SubItems.Add("");
                     lvi.ImageIndex = 3;
                 }
 
@@ -273,6 +275,28 @@ namespace ShareX
 
         private static void task_UploadCompleted(WorkerTask task)
         {
+            TaskInfo info = task.Info;
+
+            if (info != null && info.Result != null && !info.Result.IsError)
+            {
+                string url = info.Result.ToString();
+
+                if (!string.IsNullOrEmpty(url))
+                {
+                    string text = $"Upload completed. URL: {url}";
+
+                    if (info.UploadDuration != null)
+                    {
+                        text += $", Duration: {info.UploadDuration.ElapsedMilliseconds} ms";
+                    }
+
+                    DebugHelper.WriteLine(text);
+                }
+            }
+        }
+
+        private static void task_TaskCompleted(WorkerTask task)
+        {
             try
             {
                 if (ListViewControl != null && task != null)
@@ -297,7 +321,7 @@ namespace ShareX
                             if (lvi != null)
                             {
                                 lvi.SubItems[1].Text = Resources.TaskManager_task_UploadCompleted_Error;
-                                lvi.SubItems[6].Text = string.Empty;
+                                lvi.SubItems[6].Text = "";
                                 lvi.ImageIndex = 1;
                             }
 
@@ -317,7 +341,7 @@ namespace ShareX
                         }
                         else
                         {
-                            DebugHelper.WriteLine("Task completed. Filename: {0}, URL: {1}, Duration: {2} ms", info.FileName, info.Result.ToString(), (int)info.UploadDuration.TotalMilliseconds);
+                            DebugHelper.WriteLine($"Task completed. Filename: {info.FileName}, Duration: {(long)info.TaskDuration.TotalMilliseconds} ms");
 
                             string result = info.Result.ToString();
 
@@ -381,16 +405,17 @@ namespace ShareX
                                                     URL = result
                                                 };
                                                 NotificationForm.Show((int)(info.TaskSettings.AdvancedSettings.ToastWindowDuration * 1000),
+                                                    (int)(info.TaskSettings.AdvancedSettings.ToastWindowFadeDuration * 1000),
                                                     info.TaskSettings.AdvancedSettings.ToastWindowPlacement,
                                                     info.TaskSettings.AdvancedSettings.ToastWindowSize, toastConfig);
                                                 break;
                                         }
-                                    }
 
-                                    if (info.TaskSettings.AfterUploadJob.HasFlag(AfterUploadTasks.ShowAfterUploadWindow))
-                                    {
-                                        AfterUploadForm dlg = new AfterUploadForm(info);
-                                        NativeMethods.ShowWindow(dlg.Handle, (int)WindowShowStyle.ShowNoActivate);
+                                        if (info.TaskSettings.AfterUploadJob.HasFlag(AfterUploadTasks.ShowAfterUploadWindow) && info.IsUploadJob)
+                                        {
+                                            AfterUploadForm dlg = new AfterUploadForm(info);
+                                            NativeMethods.ShowWindow(dlg.Handle, (int)WindowShowStyle.ShowNoActivate);
+                                        }
                                     }
                                 }
                             }
@@ -413,8 +438,18 @@ namespace ShareX
                 {
                     StartTasks();
                     UpdateProgressUI();
+
+                    if (Program.Settings.SaveSettingsAfterTaskCompleted && !IsBusy)
+                    {
+                        Program.SaveAllSettingsAsync();
+                    }
                 }
             }
+        }
+
+        private static void Task_UploadersConfigWindowRequested(IUploaderService uploaderService)
+        {
+            TaskHelpers.OpenUploadersConfigWindow(uploaderService);
         }
 
         public static void UpdateProgressUI()

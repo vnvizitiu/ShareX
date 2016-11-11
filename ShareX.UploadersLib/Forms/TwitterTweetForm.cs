@@ -24,7 +24,6 @@
 #endregion License Information (GPL v3)
 
 using ShareX.HelpersLib;
-using ShareX.UploadersLib.HelperClasses;
 using ShareX.UploadersLib.ImageUploaders;
 using ShareX.UploadersLib.Properties;
 using System;
@@ -103,14 +102,12 @@ namespace ShareX.UploadersLib
             MediaMode = false;
         }
 
-        public TwitterTweetForm(OAuthInfo oauth)
-            : this()
+        public TwitterTweetForm(OAuthInfo oauth) : this()
         {
             AuthInfo = oauth;
         }
 
-        public TwitterTweetForm(OAuthInfo oauth, string message)
-            : this(oauth)
+        public TwitterTweetForm(OAuthInfo oauth, string message) : this(oauth)
         {
             Message = message;
         }
@@ -153,7 +150,7 @@ namespace ShareX.UploadersLib
         private void TwitterMsg_Shown(object sender, EventArgs e)
         {
             txtTweet.Select(txtTweet.TextLength, 0);
-            this.ShowActivate();
+            this.ForceActivate();
         }
 
         private void txtTweet_TextChanged(object sender, EventArgs e)

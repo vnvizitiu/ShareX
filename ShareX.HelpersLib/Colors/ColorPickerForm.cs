@@ -37,8 +37,7 @@ namespace ShareX.HelpersLib
         private bool oldColorExist;
         private bool controlChangingColor;
 
-        public ColorPickerForm()
-            : this(Color.Red)
+        public ColorPickerForm() : this(Color.Red)
         {
         }
 
@@ -202,6 +201,11 @@ namespace ShareX.HelpersLib
             {
                 colorPicker.ChangeColor(Color.FromArgb((int)nudAlpha.Value, (int)nudRed.Value, (int)nudGreen.Value, (int)nudBlue.Value), ColorType.RGBA);
             }
+        }
+
+        private void cbTransparent_Click(object sender, EventArgs e)
+        {
+            nudAlpha.Value = 0;
         }
 
         private void HSB_ValueChanged(object sender, EventArgs e)

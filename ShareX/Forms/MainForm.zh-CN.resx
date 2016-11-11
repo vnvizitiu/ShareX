@@ -267,9 +267,6 @@
   <data name="tsmiFileUploaders.Text" xml:space="preserve">
     <value>文件上传者</value>
   </data>
-  <data name="tsmiFreeHand.Text" xml:space="preserve">
-    <value>手绘</value>
-  </data>
   <data name="tsmiFTPClient.Text" xml:space="preserve">
     <value>FTP客户端...</value>
   </data>
@@ -339,17 +336,11 @@
   <data name="tsmiOpenURL.Text" xml:space="preserve">
     <value>URL</value>
   </data>
-  <data name="tsmiPolygon.Text" xml:space="preserve">
-    <value>多边形</value>
-  </data>
   <data name="tsmiQRCode.Text" xml:space="preserve">
     <value>二维码...</value>
   </data>
   <data name="tsmiRectangle.Text" xml:space="preserve">
     <value>矩形</value>
-  </data>
-  <data name="tsmiRectangleAnnotate.Text" xml:space="preserve">
-    <value>矩形（画笔）</value>
   </data>
   <data name="tsmiRectangleLight.Text" xml:space="preserve">
     <value>矩形（光）</value>
@@ -444,9 +435,6 @@
   <data name="tsmiTrayFileUploaders.Text" xml:space="preserve">
     <value>文件上传者</value>
   </data>
-  <data name="tsmiTrayFreeHand.Text" xml:space="preserve">
-    <value>写意</value>
-  </data>
   <data name="tsmiTrayFTPClient.Text" xml:space="preserve">
     <value>FTP客户端...</value>
   </data>
@@ -486,17 +474,11 @@
   <data name="tsmiTrayMonitorTest.Text" xml:space="preserve">
     <value>显示器测试...</value>
   </data>
-  <data name="tsmiTrayPolygon.Text" xml:space="preserve">
-    <value>多边形</value>
-  </data>
   <data name="tsmiTrayQRCode.Text" xml:space="preserve">
     <value>二维码...</value>
   </data>
   <data name="tsmiTrayRectangle.Text" xml:space="preserve">
     <value>矩形</value>
-  </data>
-  <data name="tsmiTrayRectangleAnnotate.Text" xml:space="preserve">
-    <value>矩形（画笔）</value>
   </data>
   <data name="tsmiTrayRectangleLight.Text" xml:space="preserve">
     <value>矩形（光）</value>
@@ -656,5 +638,29 @@
   </data>
   <data name="tsmiTrayRecentItems.Text" xml:space="preserve">
     <value>最近的链接</value>
+  </data>
+  <data name="tsmiTextCapture.Text" xml:space="preserve">
+    <value>文本捕捉（OCR）</value>
+  </data>
+  <data name="tsmiDownloadSelectedURL.Text" xml:space="preserve">
+    <value>下载</value>
+  </data>
+  <data name="tsmiTrayTextCapture.Text" xml:space="preserve">
+    <value>文本捕捉（OCR）</value>
+  </data>
+  <data name="pbPatreonHide.ToolTip" xml:space="preserve">
+    <value>永久隐藏Patreon按钮</value>
+  </data>
+  <data name="pbPatreonOpen.ToolTip" xml:space="preserve">
+    <value>打开ShareX在Patreon上的捐助页面</value>
+  </data>
+  <data name="pbTips.ToolTip" xml:space="preserve">
+    <value>显示提示和快捷键</value>
+  </data>
+  <data name="tsmiHideColumns.Text" xml:space="preserve">
+    <value>隐藏列</value>
+  </data>
+  <data name="niTray.Text" xml:space="preserve">
+    <value>ShareX</value>
   </data>
 </root>

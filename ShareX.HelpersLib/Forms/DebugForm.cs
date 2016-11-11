@@ -90,7 +90,7 @@ namespace ShareX.HelpersLib
             string directoryPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                if (assembly.Location.StartsWith(directoryPath, StringComparison.InvariantCultureIgnoreCase))
+                if (!assembly.IsDynamic && assembly.Location.StartsWith(directoryPath, StringComparison.InvariantCultureIgnoreCase))
                 {
                     sb.AppendLine(assembly.ManifestModule.Name);
                 }
