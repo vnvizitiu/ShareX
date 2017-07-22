@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -68,6 +68,16 @@ namespace ShareX
             }
         }
 
+        private void tttvMain_TabChanged(TabPage tabPage)
+        {
+#if WindowsStore
+            if (tabPage == tpIntegration)
+            {
+                CheckWindowsStoreStartup();
+            }
+#endif
+        }
+
         private void InitializeControls()
         {
             InitializeComponent();
@@ -75,7 +85,7 @@ namespace ShareX
             foreach (SupportedLanguage language in Helpers.GetEnums<SupportedLanguage>())
             {
                 ToolStripMenuItem tsmi = new ToolStripMenuItem(language.GetLocalizedDescription());
-                tsmi.Image = GetLanguageIcon(language);
+                tsmi.Image = LanguageHelper.GetLanguageIcon(language);
                 tsmi.ImageScaling = ToolStripItemImageScaling.None;
                 SupportedLanguage lang = language;
                 tsmi.Click += (sender, e) => ChangeLanguage(lang);
@@ -113,16 +123,28 @@ namespace ShareX
             cbTrayLeftClickAction.SelectedIndex = (int)Program.Settings.TrayLeftClickAction;
             cbTrayMiddleClickAction.SelectedIndex = (int)Program.Settings.TrayMiddleClickAction;
 
-#if STEAM
+#if STEAM || WindowsStore
             cbCheckPreReleaseUpdates.Visible = false;
 #else
             cbCheckPreReleaseUpdates.Checked = Program.Settings.CheckPreReleaseUpdates;
 #endif
 
             // Integration
+#if WindowsStore
+            cbStartWithWindows.Enabled = false;
+            cbShellContextMenu.Visible = false;
+            cbSendToMenu.Visible = false;
+            gbChrome.Visible = false;
+            gbFirefox.Visible = false;
+#else
             cbStartWithWindows.Checked = IntegrationHelpers.CheckStartupShortcut();
             cbShellContextMenu.Checked = IntegrationHelpers.CheckShellContextMenuButton();
             cbSendToMenu.Checked = IntegrationHelpers.CheckSendToMenuButton();
+            cbChromeExtensionSupport.Checked = IntegrationHelpers.CheckChromeExtensionSupport();
+            btnChromeOpenExtensionPage.Enabled = cbChromeExtensionSupport.Checked;
+            cbFirefoxAddonSupport.Checked = IntegrationHelpers.CheckFirefoxAddonSupport();
+            btnFirefoxOpenAddonPage.Enabled = cbFirefoxAddonSupport.Checked;
+#endif
 
 #if STEAM
             cbSteamShowInApp.Checked = IntegrationHelpers.CheckSteamShowInApp();
@@ -211,61 +233,10 @@ namespace ShareX
             ready = true;
         }
 
-        private Image GetLanguageIcon(SupportedLanguage language)
-        {
-            Image icon;
-
-            switch (language)
-            {
-                default:
-                case SupportedLanguage.Automatic:
-                    icon = Resources.globe;
-                    break;
-                case SupportedLanguage.Dutch:
-                    icon = Resources.nl;
-                    break;
-                case SupportedLanguage.English:
-                    icon = Resources.us;
-                    break;
-                case SupportedLanguage.French:
-                    icon = Resources.fr;
-                    break;
-                case SupportedLanguage.German:
-                    icon = Resources.de;
-                    break;
-                case SupportedLanguage.Hungarian:
-                    icon = Resources.hu;
-                    break;
-                case SupportedLanguage.Korean:
-                    icon = Resources.kr;
-                    break;
-                case SupportedLanguage.PortugueseBrazil:
-                    icon = Resources.br;
-                    break;
-                case SupportedLanguage.Russian:
-                    icon = Resources.ru;
-                    break;
-                case SupportedLanguage.SimplifiedChinese:
-                    icon = Resources.cn;
-                    break;
-                case SupportedLanguage.Spanish:
-                    icon = Resources.es;
-                    break;
-                case SupportedLanguage.Turkish:
-                    icon = Resources.tr;
-                    break;
-                case SupportedLanguage.Vietnamese:
-                    icon = Resources.vn;
-                    break;
-            }
-
-            return icon;
-        }
-
         private void ChangeLanguage(SupportedLanguage language)
         {
             btnLanguages.Text = language.GetLocalizedDescription();
-            btnLanguages.Image = GetLanguageIcon(language);
+            btnLanguages.Image = LanguageHelper.GetLanguageIcon(language);
 
             if (ready)
             {
@@ -328,6 +299,78 @@ namespace ShareX
         private void UpdateExportButton()
         {
             btnExport.Enabled = Program.Settings.ExportSettings || Program.Settings.ExportHistory || Program.Settings.ExportLogs;
+        }
+
+        private void CheckWindowsStoreStartup()
+        {
+            if (cbStartWithWindows.Enabled) return;
+
+            lblWindowsStoreStartupStatus.Text = "Checking startup state...";
+            lblWindowsStoreStartupStatus.Visible = true;
+
+            StartupTaskState state = StartupTaskState.Error;
+
+            TaskEx.Run(() =>
+            {
+                state = IntegrationHelpers.CheckStartupWindowsStore();
+            },
+            () =>
+            {
+                if (!IsDisposed)
+                {
+                    if (state == StartupTaskState.Error)
+                    {
+                        lblWindowsStoreStartupStatus.Text = "Startup state check failed. Check debug log for more info.";
+                    }
+                    else if (state == StartupTaskState.DisabledByUser)
+                    {
+                        lblWindowsStoreStartupStatus.Text = "The startup has been disabled by the user.";
+                    }
+                    else
+                    {
+                        lblWindowsStoreStartupStatus.Visible = false;
+                        cbStartWithWindows.Checked = state == StartupTaskState.Enabled;
+                        cbStartWithWindows.Enabled = true;
+                    }
+                }
+            });
+        }
+
+        private void ConfigureWindowsStoreStartup()
+        {
+            if (cbStartWithWindows.Enabled)
+            {
+                cbStartWithWindows.Enabled = false;
+                lblWindowsStoreStartupStatus.Text = "Configuring startup...";
+                lblWindowsStoreStartupStatus.Visible = true;
+
+                bool enable = cbStartWithWindows.Checked;
+                StartupTaskState state = StartupTaskState.Error;
+
+                TaskEx.Run(() =>
+                {
+                    state = IntegrationHelpers.ConfigureStartupWindowsStore(enable);
+                },
+                () =>
+                {
+                    if (!IsDisposed)
+                    {
+                        if (state == StartupTaskState.Error)
+                        {
+                            lblWindowsStoreStartupStatus.Text = "Startup configuration failed. Check debug log for more info.";
+                        }
+                        else if (state == StartupTaskState.DisabledByUser)
+                        {
+                            lblWindowsStoreStartupStatus.Text = "The startup has been disabled by the user.";
+                        }
+                        else
+                        {
+                            lblWindowsStoreStartupStatus.Visible = false;
+                            cbStartWithWindows.Enabled = true;
+                        }
+                    }
+                });
+            }
         }
 
         #region General
@@ -407,7 +450,11 @@ namespace ShareX
         {
             if (ready)
             {
+#if WindowsStore
+                ConfigureWindowsStoreStartup();
+#else
                 IntegrationHelpers.CreateStartupShortcut(cbStartWithWindows.Checked);
+#endif
             }
         }
 
@@ -427,9 +474,32 @@ namespace ShareX
             }
         }
 
-        private void btnChromeSupport_Click(object sender, EventArgs e)
+        private void cbChromeExtensionSupport_CheckedChanged(object sender, EventArgs e)
         {
-            new ChromeForm().Show();
+            if (ready)
+            {
+                IntegrationHelpers.CreateChromeExtensionSupport(cbChromeExtensionSupport.Checked);
+                btnChromeOpenExtensionPage.Enabled = cbChromeExtensionSupport.Checked;
+            }
+        }
+
+        private void btnChromeOpenExtensionPage_Click(object sender, EventArgs e)
+        {
+            URLHelpers.OpenURL("https://chrome.google.com/webstore/detail/sharex/nlkoigbdolhchiicbonbihbphgamnaoc");
+        }
+
+        private void cbFirefoxAddonSupport_CheckedChanged(object sender, EventArgs e)
+        {
+            if (ready)
+            {
+                IntegrationHelpers.CreateFirefoxAddonSupport(cbFirefoxAddonSupport.Checked);
+                btnFirefoxOpenAddonPage.Enabled = cbFirefoxAddonSupport.Checked;
+            }
+        }
+
+        private void btnFirefoxOpenAddonPage_Click(object sender, EventArgs e)
+        {
+            URLHelpers.OpenURL("https://addons.mozilla.org/en-US/firefox/addon/sharex/");
         }
 
         private void cbSteamShowInApp_CheckedChanged(object sender, EventArgs e)
@@ -521,17 +591,17 @@ namespace ShareX
                 {
                     btnExport.Enabled = false;
                     btnImport.Enabled = false;
+                    pbExportImport.Location = btnExport.Location;
                     pbExportImport.Visible = true;
 
                     string exportPath = sfd.FileName;
 
-                    DebugHelper.WriteLine("Export started: " + exportPath);
+                    DebugHelper.WriteLine($"Export started: {exportPath}");
 
                     TaskEx.Run(() =>
                     {
-                        Program.SaveAllSettings();
-
-                        ExportImportManager.Export(exportPath);
+                        SettingManager.SaveAllSettings();
+                        SettingManager.Export(exportPath);
                     },
                     () =>
                     {
@@ -542,7 +612,7 @@ namespace ShareX
                             btnImport.Enabled = true;
                         }
 
-                        DebugHelper.WriteLine("Export completed: " + exportPath);
+                        DebugHelper.WriteLine($"Export completed: {exportPath}");
                     });
                 }
             }
@@ -558,17 +628,17 @@ namespace ShareX
                 {
                     btnExport.Enabled = false;
                     btnImport.Enabled = false;
+                    pbExportImport.Location = btnImport.Location;
                     pbExportImport.Visible = true;
 
                     string importPath = ofd.FileName;
 
-                    DebugHelper.WriteLine("Import started: " + importPath);
+                    DebugHelper.WriteLine($"Import started: {importPath}");
 
                     TaskEx.Run(() =>
                     {
-                        ExportImportManager.Import(importPath);
-
-                        Program.LoadAllSettings();
+                        SettingManager.Import(importPath);
+                        SettingManager.LoadAllSettings();
                     },
                     () =>
                     {
@@ -585,9 +655,26 @@ namespace ShareX
 
                         Program.MainForm.UpdateControls();
 
-                        DebugHelper.WriteLine("Import completed: " + importPath);
+                        DebugHelper.WriteLine($"Import completed: {importPath}");
                     });
                 }
+            }
+        }
+
+        private void btnResetSettings_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Would you like to reset ShareX settings?", "ShareX", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+            {
+                SettingManager.ResetSettings();
+                SettingManager.SaveAllSettings();
+
+                UpdateControls();
+
+                LanguageHelper.ChangeLanguage(Program.Settings.Language);
+
+                Program.MainForm.UpdateControls();
+
+                DebugHelper.WriteLine("Settings reset.");
             }
         }
 

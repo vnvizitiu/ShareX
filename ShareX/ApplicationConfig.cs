@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -27,6 +27,7 @@ using ShareX.HelpersLib;
 using ShareX.ScreenCaptureLib;
 using ShareX.UploadersLib;
 using ShareX.UploadersLib.OtherServices;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -57,6 +58,7 @@ namespace ShareX
         public bool ShowColumns = true;
         public ImagePreviewVisibility ImagePreview = ImagePreviewVisibility.Automatic;
         public int PreviewSplitterDistance = 335;
+        public DateTime NewsLastReadDate;
 
         #endregion Main Form
 
@@ -166,7 +168,7 @@ namespace ShareX
         [Category("Application"), DefaultValue(true), Description("Default .NET method can't copy image with alpha channel to clipboard. Alternatively, when this setting is false, ShareX copies \"PNG\" and 32 bit \"DIB\" to clipboard in order to retain image transparency. If you are experiencing issues then set this setting to true to use the default .NET method.")]
         public bool UseDefaultClipboardCopyImage { get; set; }
 
-        [Category("Application"), DefaultValue(false), Description("Default .NET method can't get image with alpha channel from clipboard. Alternatively, when this setting is false, ShareX checks if clipboard contains \"PNG\" or 32 bit \"DIB\" in order to retain image transparency. If you are experiencing issues then set this setting to true to use the default .NET method.")]
+        [Category("Application"), DefaultValue(true), Description("Default .NET method can't get image with alpha channel from clipboard. Alternatively, when this setting is false, ShareX checks if clipboard contains \"PNG\" or 32 bit \"DIB\" in order to retain image transparency. If you are experiencing issues then set this setting to true to use the default .NET method.")]
         public bool UseDefaultClipboardGetImage { get; set; }
 
         [Category("Application"), DefaultValue(true), Description("Because default .NET image copying not supports alpha channel, background of image will be black. This option will fill background white.")]
@@ -176,7 +178,7 @@ namespace ShareX
         public bool WorkflowsOnlyShowEdited { get; set; }
 
         [Category("Application"), DefaultValue(true), Description("Automatically check updates.")]
-#if STEAM
+#if STEAM || WindowsStore
         [Browsable(false)]
 #endif
         public bool AutoCheckUpdate { get; set; }
@@ -193,9 +195,6 @@ namespace ShareX
         [Category("Application"), DefaultValue(""), Description("URLs will open using this path instead of default browser. Example path: chrome.exe")]
         [Editor(typeof(ExeFileNameEditor), typeof(UITypeEditor))]
         public string BrowserPath { get; set; }
-
-        [Category("Application"), DefaultValue(false), Description("Automatically detect external changes to UploaderConfig file and load settings to memory.")]
-        public bool DetectUploaderConfigFileChanges { get; set; }
 
         [Category("Application"), DefaultValue(false), Description("Show version and build info in tray text so if you are running more than one ShareX build you can differentiate them in tray bar.")]
         public bool TrayTextMoreInfo { get; set; }
@@ -258,12 +257,6 @@ namespace ShareX
 
         #endregion ScreenRecord Form
 
-        #region Automate Form
-
-        public List<ScriptInfo> AutomateScripts = new List<ScriptInfo>();
-
-        #endregion Automate Form
-
         #region Webpage Capture Form
 
         public WebpageCaptureOptions WebpageCaptureOptions = new WebpageCaptureOptions();
@@ -275,5 +268,20 @@ namespace ShareX
         public OCRSpaceLanguages OCRLanguage = OCRSpaceLanguages.eng;
 
         #endregion OCR Form
+
+        #region Actions toolbar
+
+        public List<HotkeyType> ActionsToolbarList = new List<HotkeyType>() { HotkeyType.RectangleRegion, HotkeyType.PrintScreen, HotkeyType.ScreenRecorder,
+            HotkeyType.None, HotkeyType.FileUpload, HotkeyType.ClipboardUploadWithContentViewer };
+
+        public bool ActionsToolbarRunAtStartup = false;
+
+        public Point ActionsToolbarPosition = Point.Empty;
+
+        public bool ActionsToolbarLockPosition = false;
+
+        public bool ActionsToolbarStayTopMost = true;
+
+        #endregion Actions toolbar
     }
 }

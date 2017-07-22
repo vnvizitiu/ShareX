@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -37,6 +37,7 @@ namespace ShareX
     {
         public event Action StopRequested;
 
+        public bool IsWorking { get; private set; }
         public bool IsRecording { get; private set; }
         public bool IsCountdown { get; set; }
         public TimeSpan Countdown { get; set; }
@@ -222,8 +223,13 @@ namespace ShareX
 
         public void StartStopRecording()
         {
-            if (IsRecording)
+            if (IsWorking)
             {
+                if (!IsRecording)
+                {
+                    AbortRequested = true;
+                }
+
                 OnStopRequested();
             }
             else if (RecordResetEvent != null)
@@ -258,14 +264,15 @@ namespace ShareX
                         cmsMain.Enabled = true;
                         break;
                     case ScreenRecordState.AfterStart:
+                        IsWorking = true;
                         string trayTextAfterStart = "ShareX - " + Resources.ScreenRecordForm_StartRecording_Click_tray_icon_to_stop_recording_;
                         niTray.Text = trayTextAfterStart.Truncate(63);
                         niTray.Icon = Resources.control_record.ToIcon();
                         tsmiStart.Text = Resources.AutoCaptureForm_Execute_Stop;
                         btnStart.Text = Resources.AutoCaptureForm_Execute_Stop;
-                        IsRecording = true;
                         break;
                     case ScreenRecordState.AfterRecordingStart:
+                        IsRecording = true;
                         StartRecordingTimer();
                         break;
                     case ScreenRecordState.AfterStop:

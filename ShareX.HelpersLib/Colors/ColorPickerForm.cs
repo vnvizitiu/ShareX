@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -37,37 +37,37 @@ namespace ShareX.HelpersLib
         private bool oldColorExist;
         private bool controlChangingColor;
 
-        public ColorPickerForm() : this(Color.Red)
+        public ColorPickerForm() : this(Color.Red, false)
         {
         }
 
-        public ColorPickerForm(Color currentColor)
+        public ColorPickerForm(Color currentColor, bool showOldColor = true)
         {
             InitializeComponent();
             Icon = ShareXResources.Icon;
 
-            SetCurrentColor(currentColor, false);
+            SetCurrentColor(currentColor, showOldColor);
         }
 
-        public static Color GetColor(Color currentColor)
+        public static bool PickColor(Color currentColor, out Color newColor)
         {
             using (ColorPickerForm dialog = new ColorPickerForm(currentColor))
             {
-                dialog.rbSaturation.Checked = true;
-
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
-                    return dialog.NewColor;
+                    newColor = dialog.NewColor;
+                    return true;
                 }
             }
 
-            return currentColor;
+            newColor = currentColor;
+            return false;
         }
 
         public void SetCurrentColor(Color currentColor, bool keepPreviousColor)
         {
             oldColorExist = keepPreviousColor;
-            colorPicker.DrawCrosshair = lblOld.Visible = oldColorExist;
+            lblOld.Visible = oldColorExist;
             NewColor = OldColor = currentColor;
             colorPicker.ChangeColor(currentColor);
             nudAlpha.SetValue(currentColor.A);
@@ -205,7 +205,14 @@ namespace ShareX.HelpersLib
 
         private void cbTransparent_Click(object sender, EventArgs e)
         {
-            nudAlpha.Value = 0;
+            if (nudAlpha.Value == 0)
+            {
+                nudAlpha.Value = 255;
+            }
+            else
+            {
+                nudAlpha.Value = 0;
+            }
         }
 
         private void HSB_ValueChanged(object sender, EventArgs e)

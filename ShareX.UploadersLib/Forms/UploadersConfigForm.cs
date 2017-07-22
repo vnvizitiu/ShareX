@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -41,6 +41,8 @@ namespace ShareX.UploadersLib
 {
     public partial class UploadersConfigForm : Form
     {
+        public static bool IsInstanceActive => instance != null && !instance.IsDisposed;
+
         private static UploadersConfigForm instance;
 
         public UploadersConfig Config { get; private set; }
@@ -55,16 +57,11 @@ namespace ShareX.UploadersLib
             InitializeControls();
         }
 
-        public static UploadersConfigForm GetFormInstance(UploadersConfig config, out bool firstInstance)
+        public static UploadersConfigForm GetFormInstance(UploadersConfig config)
         {
-            if (instance == null || instance.IsDisposed)
+            if (!IsInstanceActive)
             {
                 instance = new UploadersConfigForm(config);
-                firstInstance = true;
-            }
-            else
-            {
-                firstInstance = false;
             }
 
             return instance;
@@ -101,14 +98,10 @@ namespace ShareX.UploadersLib
             CodeMenu.Create<CodeMenuEntryFilename>(txtCustomUploaderArgValue, CodeMenuEntryFilename.n, CodeMenuEntryFilename.t, CodeMenuEntryFilename.pn);
             CodeMenu.Create<CodeMenuEntryFilename>(txtCustomUploaderHeaderValue, CodeMenuEntryFilename.n, CodeMenuEntryFilename.t, CodeMenuEntryFilename.pn);
 
-            txtCustomUploaderLog.AddContextMenu();
-
             // FTP
-            ucFTPAccounts.btnAdd.Click += FTPAccountAddButton_Click;
-            ucFTPAccounts.btnRemove.Click += FTPAccountRemoveButton_Click;
-            ucFTPAccounts.btnDuplicate.Click += FTPAccountDuplicateButton_Click;
-            ucFTPAccounts.btnTest.Click += FTPAccountTestButton_Click;
-            ucFTPAccounts.pgSettings.PropertyValueChanged += FtpAccountSettingsGrid_PropertyValueChanged;
+            cbFTPURLPathProtocol.Items.AddRange(Helpers.GetEnumDescriptions<BrowserProtocol>());
+            cbFTPSEncryption.Items.AddRange(Enum.GetNames(typeof(FTPSEncryption)));
+            eiFTP.ObjectType = typeof(FTPAccount);
 
             // Localhost
             ucLocalhostAccounts.btnAdd.Click += LocalhostAccountAddButton_Click;
@@ -117,8 +110,13 @@ namespace ShareX.UploadersLib
             ucLocalhostAccounts.btnTest.Visible = false;
             ucLocalhostAccounts.pgSettings.PropertyValueChanged += SettingsGrid_LocalhostPropertyValueChanged;
 
-            eiFTP.ObjectType = typeof(FTPAccount);
+            // Custom uploader
+            txtCustomUploaderLog.AddContextMenu();
             eiCustomUploaders.ObjectType = typeof(CustomUploaderItem);
+            txtCustomUploaderName.HandleCreated += (sender, e) => txtCustomUploaderName.SetWatermark(Resources.UploadersConfigForm_CustomUploader_Name);
+            AddCustomUploaderDestinationTypes();
+            cbCustomUploaderRequestType.Items.AddRange(Enum.GetNames(typeof(CustomUploaderRequestType)));
+            cbCustomUploaderResponseType.Items.AddRange(Helpers.GetLocalizedEnumDescriptions<ResponseType>());
 
 #if DEBUG
             btnCheveretoTestAll.Visible = true;
@@ -185,6 +183,7 @@ namespace ShareX.UploadersLib
             cbImgurThumbnailType.Items.Clear();
             cbImgurThumbnailType.Items.AddRange(Helpers.GetEnumDescriptions<ImgurThumbnailType>());
             cbImgurThumbnailType.SelectedIndex = (int)Config.ImgurThumbnailType;
+            cbImgurUseHTTPS.Checked = Config.ImgurUseHTTPS;
             cbImgurUseGIFV.Checked = Config.ImgurUseGIFV;
             cbImgurUploadSelectedAlbum.Checked = Config.ImgurUploadSelectedAlbum;
             ImgurFillAlbumList();
@@ -297,6 +296,7 @@ namespace ShareX.UploadersLib
 
             cbGistPublishPublic.Checked = Config.GistPublishPublic;
             cbGistUseRawURL.Checked = Config.GistRawURL;
+            txtGistCustomURL.Text = Config.GistCustomURL;
 
             // Upaste
 
@@ -314,6 +314,10 @@ namespace ShareX.UploadersLib
             txtOneTimeSecretEmail.Text = Config.OneTimeSecretAPIUsername;
             txtOneTimeSecretAPIKey.Text = Config.OneTimeSecretAPIKey;
 
+            // Pastie
+
+            cbPastieIsPublic.Checked = Config.PastieIsPublic;
+
             #endregion Text uploaders
 
             #region File uploaders
@@ -322,15 +326,14 @@ namespace ShareX.UploadersLib
 
             if (Config.FTPAccountList == null || Config.FTPAccountList.Count == 0)
             {
-                FTPSetup(new List<FTPAccount>());
+                FTPUpdateControls(new List<FTPAccount>());
+                FTPClearFields();
             }
             else
             {
-                FTPSetup(Config.FTPAccountList);
-                if (ucFTPAccounts.lbAccounts.Items.Count > 0)
-                {
-                    ucFTPAccounts.lbAccounts.SelectedIndex = 0;
-                }
+                FTPUpdateControls();
+                cbFTPAccounts.SelectedIndex = cbFTPImage.SelectedIndex;
+                FTPUpdateEnabledStates();
             }
 
             // Dropbox
@@ -342,10 +345,8 @@ namespace ShareX.UploadersLib
 
             txtDropboxPath.Text = Config.DropboxUploadPath;
             cbDropboxAutoCreateShareableLink.Checked = Config.DropboxAutoCreateShareableLink;
-            cbDropboxURLType.Enabled = Config.DropboxAutoCreateShareableLink;
-            cbDropboxURLType.Items.AddRange(Helpers.GetEnumNamesProper<DropboxURLType>());
-            cbDropboxURLType.SelectedIndex = (int)Config.DropboxURLType;
-            UpdateDropboxStatus();
+            cbDropboxUseDirectLink.Enabled = Config.DropboxAutoCreateShareableLink;
+            cbDropboxUseDirectLink.Checked = Config.DropboxUseDirectLink;
 
             // OneDrive
 
@@ -508,16 +509,24 @@ namespace ShareX.UploadersLib
 
             txtAmazonS3AccessKey.Text = Config.AmazonS3Settings.AccessKeyID;
             txtAmazonS3SecretKey.Text = Config.AmazonS3Settings.SecretAccessKey;
+            cbAmazonS3Endpoints.Items.AddRange(AmazonS3.Endpoints.ToArray());
+            for (int i = 0; i < cbAmazonS3Endpoints.Items.Count; i++)
+            {
+                if (((AmazonS3Endpoint)cbAmazonS3Endpoints.Items[i]).Endpoint.Equals(Config.AmazonS3Settings.Endpoint, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    cbAmazonS3Endpoints.SelectedIndex = i;
+                    break;
+                }
+            }
+            txtAmazonS3Endpoint.Text = Config.AmazonS3Settings.Endpoint;
+            txtAmazonS3Region.Text = Config.AmazonS3Settings.Region;
+            cbAmazonS3UsePathStyle.Checked = Config.AmazonS3Settings.UsePathStyle;
             txtAmazonS3BucketName.Text = Config.AmazonS3Settings.Bucket;
             txtAmazonS3ObjectPrefix.Text = Config.AmazonS3Settings.ObjectPrefix;
             cbAmazonS3CustomCNAME.Checked = Config.AmazonS3Settings.UseCustomCNAME;
             txtAmazonS3CustomDomain.Enabled = Config.AmazonS3Settings.UseCustomCNAME;
             txtAmazonS3CustomDomain.Text = Config.AmazonS3Settings.CustomDomain;
             cbAmazonS3UseRRS.Checked = Config.AmazonS3Settings.UseReducedRedundancyStorage;
-
-            cbAmazonS3Endpoint.Items.AddRange(AmazonS3.RegionEndpoints.ToArray());
-            cbAmazonS3Endpoint.SelectedItem = AmazonS3.GetCurrentRegion(Config.AmazonS3Settings);
-            cbAmazonS3Endpoint.DisplayMember = "Name";
             UpdateAmazonS3Status();
 
             // ownCloud
@@ -577,11 +586,54 @@ namespace ShareX.UploadersLib
             txtStreamableUsername.Enabled = txtStreamablePassword.Enabled = !Config.StreamableAnonymous;
             cbStreamableUseDirectURL.Checked = Config.StreamableUseDirectURL;
 
+            // s-ul
+
+            txtSulAPIKey.Text = Config.SulAPIKey;
+
             // Uplea
+
             txtUpleaApiKey.Text = Config.UpleaApiKey;
             txtUpleaEmailAddress.Text = Config.UpleaEmailAddress;
             cbUpleaInstantDownloadEnabled.Checked = Config.UpleaInstantDownloadEnabled;
             cbUpleaIsPremium.Checked = Config.UpleaIsPremiumMember;
+
+            // Azure Storage
+
+            txtAzureStorageAccountName.Text = Config.AzureStorageAccountName;
+            txtAzureStorageAccessKey.Text = Config.AzureStorageAccountAccessKey;
+            txtAzureStorageContainer.Text = Config.AzureStorageContainer;
+            cbAzureStorageEnvironment.Text = Config.AzureStorageEnvironment;
+            txtAzureStorageCustomDomain.Text = Config.AzureStorageCustomDomain;
+
+            // Plik
+
+            txtPlikAPIKey.Text = Config.PlikSettings.APIKey;
+            txtPlikURL.Text = Config.PlikSettings.URL;
+            txtPlikPassword.Text = Config.PlikSettings.Password;
+            txtPlikLogin.Text = Config.PlikSettings.Login;
+            txtPlikComment.Text = Config.PlikSettings.Comment;
+            cbPlikComment.Checked = Config.PlikSettings.HasComment;
+            cbPlikIsSecured.Checked = Config.PlikSettings.IsSecured;
+            cbPlikRemovable.Checked = Config.PlikSettings.Removable;
+            cbPlikOneShot.Checked = Config.PlikSettings.OneShot;
+            nudPlikTTL.Value = Config.PlikSettings.TTL;
+            cbxPlikTTLUnit.SelectedIndex = Config.PlikSettings.TTLUnit;
+            txtPlikComment.ReadOnly = !cbPlikComment.Checked;
+            txtPlikLogin.ReadOnly = !cbPlikIsSecured.Checked;
+            txtPlikPassword.ReadOnly = !cbPlikIsSecured.Checked;
+
+            // Gfycat
+
+            atcGfycatAccountType.SelectedAccountType = Config.GfycatAccountType;
+
+            oauth2Gfycat.Enabled = Config.GfycatAccountType == AccountType.User;
+
+            if (OAuth2Info.CheckOAuth(Config.GfycatOAuth2Info))
+            {
+                oauth2Gfycat.Status = OAuthLoginStatus.LoginSuccessful;
+            }
+
+            cbGfycatIsPublic.Checked = Config.GfycatIsPublic;
 
             #endregion File uploaders
 
@@ -626,6 +678,8 @@ namespace ShareX.UploadersLib
 
             txtPolrAPIHostname.Text = Config.PolrAPIHostname;
             txtPolrAPIKey.Text = Config.PolrAPIKey;
+            cbPolrIsSecret.Checked = Config.PolrIsSecret;
+            cbPolrUseAPIv1.Checked = Config.PolrUseAPIv1;
 
             #endregion URL shorteners
 
@@ -652,30 +706,7 @@ namespace ShareX.UploadersLib
 
             // Custom uploaders
 
-            lbCustomUploaderList.Items.Clear();
-
-            if (Config.CustomUploadersList == null)
-            {
-                Config.CustomUploadersList = new List<CustomUploaderItem>();
-            }
-            else
-            {
-                foreach (CustomUploaderItem customUploader in Config.CustomUploadersList)
-                {
-                    lbCustomUploaderList.Items.Add(customUploader.Name);
-                }
-
-                PrepareCustomUploaderList();
-            }
-
-#if DEBUG
-            btnCustomUploadersExportAll.Visible = true;
-#endif
-
-            cbCustomUploaderRequestType.Items.AddRange(Enum.GetNames(typeof(CustomUploaderRequestType)));
-            cbCustomUploaderResponseType.Items.AddRange(Helpers.GetLocalizedEnumDescriptions<ResponseType>());
-
-            CustomUploaderClearFields();
+            LoadCustomUploaderTab();
 
             #endregion Other uploaders
         }
@@ -718,6 +749,11 @@ namespace ShareX.UploadersLib
         private void cbImgurThumbnailType_SelectedIndexChanged(object sender, EventArgs e)
         {
             Config.ImgurThumbnailType = (ImgurThumbnailType)cbImgurThumbnailType.SelectedIndex;
+        }
+
+        private void cbImgurUseHTTPS_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.ImgurUseHTTPS = cbImgurUseHTTPS.Checked;
         }
 
         private void cbImgurUseGIFV_CheckedChanged(object sender, EventArgs e)
@@ -783,7 +819,7 @@ namespace ShareX.UploadersLib
             catch (Exception ex)
             {
                 DebugHelper.WriteException(ex);
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -859,7 +895,7 @@ namespace ShareX.UploadersLib
                 catch (Exception ex)
                 {
                     DebugHelper.WriteException(ex);
-                    MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ex.ShowError();
                 }
             }
         }
@@ -1174,6 +1210,11 @@ namespace ShareX.UploadersLib
             Config.GistRawURL = cbGistUseRawURL.Checked;
         }
 
+        private void txtGistCustomURL_TextChanged(object sender, EventArgs e)
+        {
+            Config.GistCustomURL = txtGistCustomURL.Text;
+        }
+
         #endregion Gist
 
         #region uPaste
@@ -1223,105 +1264,340 @@ namespace ShareX.UploadersLib
 
         #endregion OneTimeSecret
 
+        #region Pastie
+
+        private void cbPastieIsPublic_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.PastieIsPublic = cbPastieIsPublic.Checked;
+        }
+
+        #endregion Pastie
+
         #endregion Text Uploaders
 
         #region File Uploaders
 
         #region FTP
 
-        private void cboFtpImages_SelectedIndexChanged(object sender, EventArgs e)
+        private void cbFTPImage_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Config.FTPSelectedImage = cboFtpImages.SelectedIndex;
+            Config.FTPSelectedImage = cbFTPImage.SelectedIndex;
         }
 
-        private void cboFtpText_SelectedIndexChanged(object sender, EventArgs e)
+        private void cbFTPText_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Config.FTPSelectedText = cboFtpText.SelectedIndex;
+            Config.FTPSelectedText = cbFTPText.SelectedIndex;
         }
 
-        private void cboFtpFiles_SelectedIndexChanged(object sender, EventArgs e)
+        private void cbFTPFile_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Config.FTPSelectedFile = cboFtpFiles.SelectedIndex;
+            Config.FTPSelectedFile = cbFTPFile.SelectedIndex;
         }
 
-        private void btnFtpClient_Click(object sender, EventArgs e)
+        private void cbFTPAccounts_SelectedIndexChanged(object sender, EventArgs e)
         {
-            FTPOpenClient();
+            FTPLoadSelectedAccount();
+        }
+
+        private void btnFTPAdd_Click(object sender, EventArgs e)
+        {
+            FTPAddAccount(new FTPAccount());
+
+            cbFTPAccounts.SelectedIndex = cbFTPAccounts.Items.Count - 1;
+
+            txtFTPName.Focus();
+        }
+
+        private void btnFTPRemove_Click(object sender, EventArgs e)
+        {
+            int selected = cbFTPAccounts.SelectedIndex;
+
+            if (selected > -1)
+            {
+                cbFTPAccounts.Items.RemoveAt(selected);
+                Config.FTPAccountList.RemoveAt(selected);
+
+                if (cbFTPAccounts.Items.Count > 0)
+                {
+                    cbFTPAccounts.SelectedIndex = selected == cbFTPAccounts.Items.Count ? cbFTPAccounts.Items.Count - 1 : selected;
+                }
+                else
+                {
+                    FTPClearFields();
+
+                    btnFTPAdd.Focus();
+                }
+
+                FTPUpdateControls();
+            }
+        }
+
+        private void btnFTPDuplicate_Click(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+
+            if (account != null)
+            {
+                FTPAccount clone = account.Clone();
+                FTPAddAccount(clone);
+
+                cbFTPAccounts.SelectedIndex = cbFTPAccounts.Items.Count - 1;
+            }
+        }
+
+        private void txtFTPName_TextChanged(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+            if (account != null)
+            {
+                account.Name = txtFTPName.Text;
+                FTPRefreshNames();
+            }
+        }
+
+        private void rbFTPProtocolFTP_CheckedChanged(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+            if (account != null)
+            {
+                account.Protocol = FTPProtocol.FTP;
+                FTPUpdateEnabledStates();
+            }
+        }
+
+        private void rbFTPProtocolFTPS_CheckedChanged(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+            if (account != null)
+            {
+                account.Protocol = FTPProtocol.FTPS;
+                FTPUpdateEnabledStates();
+            }
+        }
+
+        private void rbFTPProtocolSFTP_CheckedChanged(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+            if (account != null)
+            {
+                account.Protocol = FTPProtocol.SFTP;
+                FTPUpdateEnabledStates();
+            }
+        }
+
+        private void txtFTPHost_TextChanged(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+            if (account != null)
+            {
+                account.Host = txtFTPHost.Text;
+                FTPUpdateURLPreview();
+                FTPRefreshNames();
+            }
+        }
+
+        private void nudFTPPort_ValueChanged(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+            if (account != null)
+            {
+                account.Port = (int)nudFTPPort.Value;
+                FTPUpdateURLPreview();
+            }
+        }
+
+        private void txtFTPUsername_TextChanged(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+            if (account != null)
+            {
+                account.Username = txtFTPUsername.Text;
+            }
+        }
+
+        private void txtFTPPassword_TextChanged(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+            if (account != null)
+            {
+                account.Password = txtFTPPassword.Text;
+            }
+        }
+
+        private void rbFTPTransferModePassive_CheckedChanged(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+            if (account != null)
+            {
+                account.IsActive = false;
+            }
+        }
+
+        private void rbFTPTransferModeActive_CheckedChanged(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+            if (account != null)
+            {
+                account.IsActive = true;
+            }
+        }
+
+        private void txtFTPRemoteDirectory_TextChanged(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+            if (account != null)
+            {
+                account.SubFolderPath = txtFTPRemoteDirectory.Text;
+                FTPUpdateURLPreview();
+            }
+        }
+
+        private void cbFTPURLPathProtocol_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+            if (account != null)
+            {
+                account.BrowserProtocol = (BrowserProtocol)cbFTPURLPathProtocol.SelectedIndex;
+                FTPUpdateURLPreview();
+            }
+        }
+
+        private void txtFTPURLPath_TextChanged(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+            if (account != null)
+            {
+                account.HttpHomePath = txtFTPURLPath.Text;
+                FTPUpdateURLPreview();
+            }
+        }
+
+        private void cbFTPAppendRemoteDirectory_CheckedChanged(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+            if (account != null)
+            {
+                account.HttpHomePathAutoAddSubFolderPath = cbFTPAppendRemoteDirectory.Checked;
+                FTPUpdateURLPreview();
+            }
+        }
+
+        private void cbFTPRemoveFileExtension_CheckedChanged(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+            if (account != null)
+            {
+                account.HttpHomePathNoExtension = cbFTPRemoveFileExtension.Checked;
+                FTPUpdateURLPreview();
+            }
+        }
+
+        private void cbFTPSEncryption_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+            if (account != null)
+            {
+                account.FTPSEncryption = (FTPSEncryption)cbFTPSEncryption.SelectedIndex;
+            }
+        }
+
+        private void txtFTPSCertificateLocation_TextChanged(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+            if (account != null)
+            {
+                account.FTPSCertificateLocation = txtFTPSCertificateLocation.Text;
+            }
+        }
+
+        private void btnFTPSCertificateLocationBrowse_Click(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+            if (account != null)
+            {
+                using (OpenFileDialog dlg = new OpenFileDialog())
+                {
+                    dlg.Title = Resources.CertFileNameEditor_EditValue_Browse_for_a_certificate_file___;
+                    dlg.Filter = "Certificate file (*.cer)|*.cer";
+                    if (dlg.ShowDialog() == DialogResult.OK)
+                    {
+                        txtFTPSCertificateLocation.Text = dlg.FileName;
+                    }
+                }
+            }
+        }
+
+        private void txtSFTPKeyLocation_TextChanged(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+            if (account != null)
+            {
+                account.Keypath = txtSFTPKeyLocation.Text;
+            }
+        }
+
+        private void btnSFTPKeyLocationBrowse_Click(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+            if (account != null)
+            {
+                using (OpenFileDialog dlg = new OpenFileDialog())
+                {
+                    dlg.Title = Resources.KeyFileNameEditor_EditValue_Browse_for_a_key_file___;
+                    dlg.Filter = "Key file (*.*)|*.*";
+                    if (dlg.ShowDialog() == DialogResult.OK)
+                    {
+                        txtSFTPKeyLocation.Text = dlg.FileName;
+                    }
+                }
+            }
+        }
+
+        private void txtSFTPKeyPassphrase_TextChanged(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+            if (account != null)
+            {
+                account.Passphrase = txtSFTPKeyPassphrase.Text;
+            }
+        }
+
+        private void btnFTPTest_Click(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+
+            if (account != null)
+            {
+                FTPTestAccountAsync(account);
+            }
+            else
+            {
+                MessageBox.Show(Resources.UploadersConfigForm_FTPOpenClient_Unable_to_find_valid_FTP_account_, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void btnFTPClient_Click(object sender, EventArgs e)
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+
+            if (account != null)
+            {
+                FTPOpenClient(account);
+            }
+            else
+            {
+                MessageBox.Show(Resources.UploadersConfigForm_FTPOpenClient_Unable_to_find_valid_FTP_account_, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
         }
 
         private object eiFTP_ExportRequested()
         {
-            return GetSelectedFTPAccount();
+            return FTPGetSelectedAccount();
         }
 
         private void eiFTP_ImportRequested(object obj)
         {
-            AddFTPAccount(obj as FTPAccount);
-        }
-
-        private void FTPSetup(IEnumerable<FTPAccount> accs)
-        {
-            if (accs != null)
-            {
-                int selFtpList = ucFTPAccounts.lbAccounts.SelectedIndex;
-
-                ucFTPAccounts.lbAccounts.Items.Clear();
-                ucFTPAccounts.pgSettings.PropertySort = PropertySort.Categorized;
-                cboFtpImages.Items.Clear();
-                cboFtpText.Items.Clear();
-                cboFtpFiles.Items.Clear();
-
-                Config.FTPAccountList = new List<FTPAccount>();
-                Config.FTPAccountList.AddRange(accs);
-
-                foreach (FTPAccount acc in Config.FTPAccountList)
-                {
-                    ucFTPAccounts.lbAccounts.Items.Add(acc);
-                    cboFtpImages.Items.Add(acc);
-                    cboFtpText.Items.Add(acc);
-                    cboFtpFiles.Items.Add(acc);
-                }
-
-                if (ucFTPAccounts.lbAccounts.Items.Count > 0)
-                {
-                    ucFTPAccounts.lbAccounts.SelectedIndex = selFtpList.Between(0, ucFTPAccounts.lbAccounts.Items.Count - 1);
-                    cboFtpImages.SelectedIndex = Config.FTPSelectedImage.Between(0, ucFTPAccounts.lbAccounts.Items.Count - 1);
-                    cboFtpText.SelectedIndex = Config.FTPSelectedText.Between(0, ucFTPAccounts.lbAccounts.Items.Count - 1);
-                    cboFtpFiles.SelectedIndex = Config.FTPSelectedFile.Between(0, ucFTPAccounts.lbAccounts.Items.Count - 1);
-                }
-            }
-        }
-
-        private void FTPAccountAddButton_Click(object sender, EventArgs e)
-        {
-            AddFTPAccount(new FTPAccount());
-        }
-
-        private void FTPAccountRemoveButton_Click(object sender, EventArgs e)
-        {
-            int sel = ucFTPAccounts.lbAccounts.SelectedIndex;
-            if (ucFTPAccounts.RemoveItem(sel))
-            {
-                Config.FTPAccountList.RemoveAt(sel);
-            }
-            FTPSetup(Config.FTPAccountList);
-        }
-
-        private void FTPAccountDuplicateButton_Click(object sender, EventArgs e)
-        {
-            FTPAccount src = (FTPAccount)ucFTPAccounts.lbAccounts.Items[ucFTPAccounts.lbAccounts.SelectedIndex];
-            FTPAccount clone = src.Clone();
-            AddFTPAccount(clone);
-        }
-
-        private void FTPAccountTestButton_Click(object sender, EventArgs e)
-        {
-            TestFTPAccountAsync(GetSelectedFTPAccount());
-        }
-
-        private void FtpAccountSettingsGrid_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
-        {
-            FTPSetup(Config.FTPAccountList);
+            FTPAddAccount(obj as FTPAccount);
         }
 
         #endregion FTP
@@ -1351,18 +1627,17 @@ namespace ShareX.UploadersLib
         private void txtDropboxPath_TextChanged(object sender, EventArgs e)
         {
             Config.DropboxUploadPath = txtDropboxPath.Text;
-            UpdateDropboxStatus();
         }
 
         private void cbDropboxAutoCreateShareableLink_CheckedChanged(object sender, EventArgs e)
         {
             Config.DropboxAutoCreateShareableLink = cbDropboxAutoCreateShareableLink.Checked;
-            cbDropboxURLType.Enabled = Config.DropboxAutoCreateShareableLink;
+            cbDropboxUseDirectLink.Enabled = Config.DropboxAutoCreateShareableLink;
         }
 
-        private void cbDropboxURLType_SelectedIndexChanged(object sender, EventArgs e)
+        private void cbDropboxUseDirectLink_CheckedChanged(object sender, EventArgs e)
         {
-            Config.DropboxURLType = (DropboxURLType)cbDropboxURLType.SelectedIndex;
+            Config.DropboxUseDirectLink = cbDropboxUseDirectLink.Checked;
         }
 
         #endregion Dropbox
@@ -1948,14 +2223,32 @@ namespace ShareX.UploadersLib
             Config.AmazonS3Settings.SecretAccessKey = txtAmazonS3SecretKey.Text;
         }
 
-        private void cbAmazonS3Endpoint_SelectionChangeCommitted(object sender, EventArgs e)
+        private void cbAmazonS3Endpoints_SelectedIndexChanged(object sender, EventArgs e)
         {
-            AmazonS3Region region = cbAmazonS3Endpoint.SelectedItem as AmazonS3Region;
-            if (region != null)
+            AmazonS3Endpoint endpoint = cbAmazonS3Endpoints.SelectedItem as AmazonS3Endpoint;
+
+            if (endpoint != null)
             {
-                Config.AmazonS3Settings.Endpoint = region.Identifier;
-                UpdateAmazonS3Status();
+                txtAmazonS3Region.Text = endpoint.Region;
+                txtAmazonS3Endpoint.Text = endpoint.Endpoint;
             }
+        }
+
+        private void txtAmazonS3Endpoint_TextChanged(object sender, EventArgs e)
+        {
+            Config.AmazonS3Settings.Endpoint = txtAmazonS3Endpoint.Text;
+            UpdateAmazonS3Status();
+        }
+
+        private void txtAmazonS3Region_TextChanged(object sender, EventArgs e)
+        {
+            Config.AmazonS3Settings.Region = txtAmazonS3Region.Text;
+            UpdateAmazonS3Status();
+        }
+
+        private void cbAmazonS3UsePathStyle_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.AmazonS3Settings.UsePathStyle = cbAmazonS3UsePathStyle.Checked;
         }
 
         private void txtAmazonS3BucketName_TextChanged(object sender, EventArgs e)
@@ -2264,6 +2557,11 @@ namespace ShareX.UploadersLib
             Config.SulAPIKey = txtSulAPIKey.Text;
         }
 
+        private void sulKeyLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            URLHelpers.OpenURL("https://s-ul.eu/account/info");
+        }
+
         #endregion Sul
 
         #region Seafile
@@ -2357,7 +2655,7 @@ namespace ShareX.UploadersLib
                 catch (Exception ex)
                 {
                     DebugHelper.WriteException(ex);
-                    MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ex.ShowError();
                 }
             }
         }
@@ -2603,6 +2901,138 @@ namespace ShareX.UploadersLib
 
         #endregion Uplea
 
+        #region Azure Storage
+
+        private void txtAzureStorageAccountName_TextChanged(object sender, EventArgs e)
+        {
+            Config.AzureStorageAccountName = txtAzureStorageAccountName.Text;
+        }
+
+        private void txtAzureStorageAccessKey_TextChanged(object sender, EventArgs e)
+        {
+            Config.AzureStorageAccountAccessKey = txtAzureStorageAccessKey.Text;
+        }
+
+        private void txtAzureStorageContainer_TextChanged(object sender, EventArgs e)
+        {
+            Config.AzureStorageContainer = txtAzureStorageContainer.Text;
+        }
+
+        private void cbAzureStorageEnvironment_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Config.AzureStorageEnvironment = cbAzureStorageEnvironment.Text;
+        }
+
+        private void txtAzureStorageCustomDomain_TextChanged(object sender, EventArgs e)
+        {
+            Config.AzureStorageCustomDomain = txtAzureStorageCustomDomain.Text;
+        }
+
+        private void btnAzureStoragePortal_Click(object sender, EventArgs e)
+        {
+            URLHelpers.OpenURL("https://portal.azure.com/?feature.customportal=false#blade/HubsExtension/Resources/resourceType/Microsoft.Storage%2FStorageAccounts");
+        }
+
+        #endregion Azure Storage
+
+        #region Plik
+
+        private void txtPlikURL_TextChanged(object sender, EventArgs e)
+        {
+            Config.PlikSettings.URL = txtPlikURL.Text;
+        }
+
+        private void txtPlikAPIKey_TextChanged(object sender, EventArgs e)
+        {
+            Config.PlikSettings.APIKey = txtPlikAPIKey.Text;
+        }
+
+        private void txtPlikLogin_TextChanged(object sender, EventArgs e)
+        {
+            Config.PlikSettings.Login = txtPlikLogin.Text;
+        }
+
+        private void txtPlikPassword_TextChanged(object sender, EventArgs e)
+        {
+            Config.PlikSettings.Password = txtPlikPassword.Text;
+        }
+
+        private void cbPlikIsSecured_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.PlikSettings.IsSecured = cbPlikIsSecured.Checked;
+            txtPlikLogin.ReadOnly = !cbPlikIsSecured.Checked;
+            txtPlikPassword.ReadOnly = !cbPlikIsSecured.Checked;
+        }
+
+        private void cbPlikRemovable_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.PlikSettings.Removable = cbPlikRemovable.Checked;
+        }
+
+        private void cbPlikComment_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.PlikSettings.HasComment = cbPlikComment.Checked;
+            txtPlikComment.ReadOnly = !cbPlikComment.Checked;
+        }
+
+        private void txtPlikComment_TextChanged(object sender, EventArgs e)
+        {
+            Config.PlikSettings.Comment = txtPlikComment.Text;
+        }
+
+        private void cbPlikOneShot_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.PlikSettings.OneShot = cbPlikOneShot.Checked;
+        }
+
+        private void cbxPlikTTLUnit_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Plik.CalculateTTLValue(nudPlikTTL, cbxPlikTTLUnit.SelectedIndex, Config.PlikSettings.TTLUnit);
+            Config.PlikSettings.TTLUnit = cbxPlikTTLUnit.SelectedIndex;
+        }
+
+        private void nudPlikTTL_ValueChanged(object sender, EventArgs e)
+        {
+            Config.PlikSettings.TTL = nudPlikTTL.Value;
+        }
+
+        #endregion Plik
+
+        #region Gfycat
+
+        private void atcGfycatAccountType_AccountTypeChanged(AccountType accountType)
+        {
+            Config.GfycatAccountType = accountType;
+            oauth2Gfycat.Enabled = Config.GfycatAccountType == AccountType.User;
+        }
+
+        private void oauth2Gfycat_OpenButtonClicked()
+        {
+            GfycatAuthOpen();
+        }
+
+        private void oauth2Gfycat_CompleteButtonClicked(string code)
+        {
+            GfycatAuthComplete(code);
+        }
+
+        private void oauth2Gfycat_ClearButtonClicked()
+        {
+            Config.GfycatOAuth2Info = null;
+        }
+
+        private void oauth2Gfycat_RefreshButtonClicked()
+        {
+            GfycatAuthRefresh();
+        }
+
+        private void cbGfycatIsPublic_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.GfycatIsPublic = cbGfycatIsPublic.Checked;
+        }
+
+        #endregion Gfycat
+
         #endregion File Uploaders
 
         #region URL Shorteners
@@ -2723,6 +3153,16 @@ namespace ShareX.UploadersLib
         private void txtPolrAPIKey_TextChanged(object sender, EventArgs e)
         {
             Config.PolrAPIKey = txtPolrAPIKey.Text;
+        }
+
+        private void cbPolrIsSecret_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.PolrIsSecret = cbPolrIsSecret.Checked;
+        }
+
+        private void cbPolrUseAPIv1_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.PolrUseAPIv1 = cbPolrUseAPIv1.Checked;
         }
 
         #endregion Polr
@@ -2994,7 +3434,7 @@ namespace ShareX.UploadersLib
 
         private void btnCustomUploaderXPathHelp_Click(object sender, EventArgs e)
         {
-            URLHelpers.OpenURL("http://www.w3schools.com/xsl/xpath_syntax.asp");
+            URLHelpers.OpenURL("https://www.w3schools.com/xml/xpath_syntax.asp");
         }
 
         private void btnCustomUploaderXmlSyntaxAdd_Click(object sender, EventArgs e)
@@ -3210,12 +3650,12 @@ namespace ShareX.UploadersLib
 
         private void btnCustomUploaderHelp_Click(object sender, EventArgs e)
         {
-            URLHelpers.OpenURL("https://github.com/ShareX/ShareX/wiki/Custom-Uploader");
+            URLHelpers.OpenURL(Links.URL_CUSTOM_UPLOADER);
         }
 
         private void btnCustomUploaderExamples_Click(object sender, EventArgs e)
         {
-            URLHelpers.OpenURL("https://github.com/ShareX/CustomUploaders");
+            URLHelpers.OpenURL(Links.URL_CUSTOM_UPLOADERS);
         }
 
         private void btnCustomUploaderShowLastResponse_Click(object sender, EventArgs e)

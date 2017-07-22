@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -168,7 +168,7 @@ namespace ShareX
                 {
                     string url = text.Trim();
 
-                    if (URLHelpers.IsValidURLRegex(url))
+                    if (URLHelpers.IsValidURL(url))
                     {
                         if (taskSettings.UploadSettings.ClipboardUploadURLContents)
                         {
@@ -276,7 +276,7 @@ namespace ShareX
             {
                 string text = Clipboard.GetText();
 
-                if (!string.IsNullOrEmpty(text) && URLHelpers.IsValidURLRegex(text))
+                if (URLHelpers.IsValidURL(text))
                 {
                     inputText = text;
                 }
@@ -292,9 +292,15 @@ namespace ShareX
 
         public static void RunImageTask(Image img, TaskSettings taskSettings, bool skipQuickTaskMenu = false, bool skipAfterCaptureWindow = false)
         {
+            ImageInfo imageInfo = new ImageInfo(img);
+            RunImageTask(imageInfo, taskSettings, skipQuickTaskMenu, skipAfterCaptureWindow);
+        }
+
+        public static void RunImageTask(ImageInfo imageInfo, TaskSettings taskSettings, bool skipQuickTaskMenu = false, bool skipAfterCaptureWindow = false)
+        {
             if (taskSettings == null) taskSettings = TaskSettings.GetDefaultTaskSettings();
 
-            if (img != null && taskSettings != null)
+            if (imageInfo != null && imageInfo.Image != null && taskSettings != null)
             {
                 if (!skipQuickTaskMenu && taskSettings.AfterCaptureJob.HasFlag(AfterCaptureTasks.ShowQuickTaskMenu))
                 {
@@ -304,13 +310,13 @@ namespace ShareX
                     {
                         if (taskInfo == null)
                         {
-                            RunImageTask(img, taskSettings, true);
+                            RunImageTask(imageInfo, taskSettings, true);
                         }
                         else if (taskInfo.IsValid)
                         {
                             taskSettings.AfterCaptureJob = taskInfo.AfterCaptureTasks;
                             taskSettings.AfterUploadJob = taskInfo.AfterUploadTasks;
-                            RunImageTask(img, taskSettings, true);
+                            RunImageTask(imageInfo, taskSettings, true);
                         }
                     };
 
@@ -321,12 +327,12 @@ namespace ShareX
 
                 string customFileName = null;
 
-                if (!skipAfterCaptureWindow && !TaskHelpers.ShowAfterCaptureForm(taskSettings, out customFileName, img))
+                if (!skipAfterCaptureWindow && !TaskHelpers.ShowAfterCaptureForm(taskSettings, out customFileName, imageInfo))
                 {
                     return;
                 }
 
-                WorkerTask task = WorkerTask.CreateImageUploaderTask(img, taskSettings, customFileName);
+                WorkerTask task = WorkerTask.CreateImageUploaderTask(imageInfo, taskSettings, customFileName);
                 TaskManager.Start(task);
             }
         }

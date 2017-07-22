@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -337,9 +337,32 @@ namespace ShareX
             if (IsItemSelected && SelectedItem.IsURLExist) UploadManager.ShareURL(SelectedItem.Info.Result.ToString(), urlSharingService);
         }
 
+        public void SearchImage()
+        {
+            if (IsItemSelected && SelectedItem.IsURLExist) TaskHelpers.SearchImage(SelectedItem.Info.Result.URL);
+        }
+
         public void ShowQRCode()
         {
             if (IsItemSelected && SelectedItem.IsURLExist) new QRCodeForm(SelectedItem.Info.Result.URL).Show();
+        }
+
+        public void OCRImage()
+        {
+            if (IsItemSelected && SelectedItem.IsImageFile) TaskHelpers.OCRImage(SelectedItem.Info.FilePath);
+        }
+
+        public void CombineImages()
+        {
+            if (SelectedItems != null)
+            {
+                IEnumerable<string> imageFiles = SelectedItems.Where(x => x.IsImageFile).Select(x => x.Info.FilePath);
+
+                if (imageFiles.Count() > 1)
+                {
+                    TaskHelpers.OpenImageCombiner(null, imageFiles);
+                }
+            }
         }
 
         public void ShowResponse()

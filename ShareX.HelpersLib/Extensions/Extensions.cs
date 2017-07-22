@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -32,6 +32,7 @@ using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 using Encoder = System.Drawing.Imaging.Encoder;
@@ -251,10 +252,10 @@ namespace ShareX.HelpersLib
 
         public static void SaveJPG(this Image img, string filepath, int quality)
         {
-            quality = quality.Between(0, 100);
-            EncoderParameters encoderParameters = new EncoderParameters(1);
-            encoderParameters.Param[0] = new EncoderParameter(Encoder.Quality, quality);
-            img.Save(filepath, ImageFormat.Jpeg.GetCodecInfo(), encoderParameters);
+            using (FileStream fs = new FileStream(filepath, FileMode.Create, FileAccess.Write, FileShare.Read))
+            {
+                SaveJPG(img, fs, quality);
+            }
         }
 
         public static void SaveGIF(this Image img, Stream stream, GIFQuality quality)
@@ -304,17 +305,12 @@ namespace ShareX.HelpersLib
 
         public static void RadioCheck(this ToolStripMenuItem tsmi)
         {
-            ToolStrip parent = tsmi.GetCurrentParent();
+            ToolStripDropDownItem tsddiParent = tsmi.OwnerItem as ToolStripDropDownItem;
 
-            foreach (ToolStripMenuItem tsmiParent in parent.Items.OfType<ToolStripMenuItem>())
+            foreach (ToolStripMenuItem tsmiChild in tsddiParent.DropDownItems.OfType<ToolStripMenuItem>())
             {
-                if (tsmiParent != tsmi)
-                {
-                    tsmiParent.Checked = false;
-                }
+                tsmiChild.Checked = tsmiChild == tsmi;
             }
-
-            tsmi.Checked = true;
         }
 
         public static void RadioCheck(this ToolStripButton tsb)
@@ -579,6 +575,16 @@ namespace ShareX.HelpersLib
         public static Point Center(this Rectangle rect)
         {
             return new Point(rect.X + rect.Width / 2, rect.Y + rect.Height / 2);
+        }
+
+        public static void RefreshItems(this ComboBox cb)
+        {
+            typeof(ComboBox).InvokeMember("RefreshItems", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.InvokeMethod, null, cb, new object[] { });
+        }
+
+        public static void ShowError(this Exception e)
+        {
+            MessageBox.Show(e.ToString(), "ShareX - " + Resources.Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }

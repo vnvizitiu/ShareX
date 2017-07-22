@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -37,6 +37,7 @@ namespace ShareX.UploadersLib
     public class CustomUploaderItem
     {
         public string Name { get; set; }
+        public CustomUploaderDestinationType DestinationType { get; set; }
         public CustomUploaderRequestType RequestType { get; set; }
         public string RequestURL { get; set; }
         public string FileFormName { get; set; }
@@ -224,6 +225,11 @@ namespace ShareX.UploadersLib
                             parseType = CustomUploaderResponseParseType.Xml;
                             syntaxStartIndex = i + 5;
                         }
+                        else if (syntaxCheck.StartsWith("random:", StringComparison.InvariantCultureIgnoreCase)) // Example: $random:domain1.com|domain2.com$
+                        {
+                            parseType = CustomUploaderResponseParseType.Random;
+                            syntaxStartIndex = i + 8;
+                        }
                         else
                         {
                             parseType = CustomUploaderResponseParseType.Regex;
@@ -249,6 +255,9 @@ namespace ShareX.UploadersLib
                                     break;
                                 case CustomUploaderResponseParseType.Xml:
                                     resultText = ParseXmlSyntax(parseText);
+                                    break;
+                                case CustomUploaderResponseParseType.Random:
+                                    resultText = ParseRandomSyntax(parseText);
                                     break;
                             }
 
@@ -340,6 +349,18 @@ namespace ShareX.UploadersLib
             }
 
             return null;
+        }
+
+        private string ParseRandomSyntax(string syntax)
+        {
+            string[] values = syntax.Split('|');
+
+            if (values.Length > 0)
+            {
+                return values[MathHelpers.Random(values.Length - 1)];
+            }
+
+            return "";
         }
     }
 }

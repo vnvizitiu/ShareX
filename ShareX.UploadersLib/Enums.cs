@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -23,6 +23,7 @@
 
 #endregion License Information (GPL v3)
 
+using System;
 using System.ComponentModel;
 
 namespace ShareX.UploadersLib
@@ -52,8 +53,6 @@ namespace ShareX.UploadersLib
         SomeImage,
         [Description("Imgland")]
         Imgland,
-        [Description("SLiMG")]
-        Slimg,
         CustomImageUploader, // Localized
         FileUploader // Localized
     }
@@ -79,6 +78,8 @@ namespace ShareX.UploadersLib
         Hastebin,
         [Description("OneTimeSecret")]
         OneTimeSecret,
+        [Description("Pastie")]
+        Pastie,
         CustomTextUploader, // Localized
         FileUploader // Localized
     }
@@ -102,12 +103,14 @@ namespace ShareX.UploadersLib
         Mega,
         [Description("Amazon S3")]
         AmazonS3,
+        [Description("Azure Storage")]
+        AzureStorage,
+        [Description("Gfycat")]
+        Gfycat,
         [Description("ownCloud")]
         OwnCloud,
         [Description("MediaFire")]
         MediaFire,
-        [Description("Gfycat")]
-        Gfycat,
         [Description("Pushbullet")]
         Pushbullet,
         [Description("SendSpace")]
@@ -142,6 +145,8 @@ namespace ShareX.UploadersLib
         Transfersh,
         [Description("Uplea")]
         Uplea,
+        [Description("Plik")]
+        Plik,
         SharedFolder, // Localized
         Email, // Localized
         CustomFileUploader // Localized
@@ -204,7 +209,8 @@ namespace ShareX.UploadersLib
         [Description("VK")]
         VK,
         [Description("Pushbullet")]
-        Pushbullet
+        Pushbullet,
+        GoogleImageSearch // Localized
     }
 
     public enum HttpMethod
@@ -309,7 +315,19 @@ namespace ShareX.UploadersLib
     {
         Regex,
         Json,
-        Xml
+        Xml,
+        Random
+    }
+
+    [Flags]
+    public enum CustomUploaderDestinationType
+    {
+        [Description("None")]
+        None = 0,
+        ImageUploader = 1, // Localized
+        TextUploader = 1 << 1, // Localized
+        FileUploader = 1 << 2, // Localized
+        URLShortener = 1 << 3 // Localized
     }
 
     public enum FTPSEncryption

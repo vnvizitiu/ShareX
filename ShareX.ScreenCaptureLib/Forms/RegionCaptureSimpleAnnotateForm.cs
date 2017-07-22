@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -163,7 +163,11 @@ namespace ShareX.ScreenCaptureLib
                 try
                 {
                     isBusy = true;
-                    Options.DrawingPenColor = ColorPickerForm.GetColor(Options.DrawingPenColor);
+
+                    if (ColorPickerForm.PickColor(Options.DrawingPenColor, out Color newColor))
+                    {
+                        Options.DrawingPenColor = newColor;
+                    }
                 }
                 finally
                 {
@@ -371,8 +375,7 @@ namespace ShareX.ScreenCaptureLib
             g.FillRectangle(textBackgroundBrush, rect.Offset(-2));
             g.DrawRectangleProper(textBackgroundPenBlack, rect.Offset(-1));
             g.DrawRectangleProper(textBackgroundPenWhite, rect);
-
-            ImageHelpers.DrawTextWithShadow(g, text, rect.Offset(-padding).Location, infoFont, Brushes.White, Brushes.Black);
+            g.DrawTextWithShadow(text, rect.Offset(-padding).Location, infoFont, Brushes.White, Brushes.Black);
         }
 
         private void DrawTips(Graphics g, int offset, int padding)

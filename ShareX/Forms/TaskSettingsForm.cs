@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -56,22 +56,25 @@ namespace ShareX
             if (IsDefault)
             {
                 tcTaskSettings.TabPages.Remove(tpTask);
-                chkUseDefaultGeneralSettings.Visible = chkUseDefaultImageSettings.Visible = chkUseDefaultCaptureSettings.Visible = chkUseDefaultActions.Visible =
-                    chkUseDefaultUploadSettings.Visible = chkUseDefaultToolsSettings.Visible = chkUseDefaultAdvancedSettings.Visible = false;
+                chkOverrideGeneralSettings.Visible = chkOverrideImageSettings.Visible = chkOverrideCaptureSettings.Visible = chkOverrideActions.Visible =
+                    chkOverrideUploadSettings.Visible = chkOverrideToolsSettings.Visible = chkOverrideAdvancedSettings.Visible = false;
             }
             else
             {
                 tbDescription.Text = TaskSettings.Description ?? "";
-                cbUseDefaultAfterCaptureSettings.Checked = TaskSettings.UseDefaultAfterCaptureJob;
-                cbUseDefaultAfterUploadSettings.Checked = TaskSettings.UseDefaultAfterUploadJob;
-                cbUseDefaultDestinationSettings.Checked = TaskSettings.UseDefaultDestinations;
-                chkUseDefaultGeneralSettings.Checked = TaskSettings.UseDefaultGeneralSettings;
-                chkUseDefaultImageSettings.Checked = TaskSettings.UseDefaultImageSettings;
-                chkUseDefaultCaptureSettings.Checked = TaskSettings.UseDefaultCaptureSettings;
-                chkUseDefaultActions.Checked = TaskSettings.UseDefaultActions;
-                chkUseDefaultUploadSettings.Checked = TaskSettings.UseDefaultUploadSettings;
-                chkUseDefaultToolsSettings.Checked = TaskSettings.UseDefaultToolsSettings;
-                chkUseDefaultAdvancedSettings.Checked = TaskSettings.UseDefaultAdvancedSettings;
+                cbOverrideAfterCaptureSettings.Checked = !TaskSettings.UseDefaultAfterCaptureJob;
+                btnAfterCapture.Enabled = !TaskSettings.UseDefaultAfterCaptureJob;
+                cbOverrideAfterUploadSettings.Checked = !TaskSettings.UseDefaultAfterUploadJob;
+                btnAfterUpload.Enabled = !TaskSettings.UseDefaultAfterUploadJob;
+                cbOverrideDestinationSettings.Checked = !TaskSettings.UseDefaultDestinations;
+                btnDestinations.Enabled = !TaskSettings.UseDefaultDestinations;
+                chkOverrideGeneralSettings.Checked = !TaskSettings.UseDefaultGeneralSettings;
+                chkOverrideImageSettings.Checked = !TaskSettings.UseDefaultImageSettings;
+                chkOverrideCaptureSettings.Checked = !TaskSettings.UseDefaultCaptureSettings;
+                chkOverrideActions.Checked = !TaskSettings.UseDefaultActions;
+                chkOverrideUploadSettings.Checked = !TaskSettings.UseDefaultUploadSettings;
+                chkOverrideToolsSettings.Checked = !TaskSettings.UseDefaultToolsSettings;
+                chkOverrideAdvancedSettings.Checked = !TaskSettings.UseDefaultAdvancedSettings;
             }
 
             UpdateDefaultSettingVisibility();
@@ -142,17 +145,23 @@ namespace ShareX
 
             if (Program.UploadersConfig != null)
             {
+                chkOverrideFTP.Enabled = cboFTPaccounts.Enabled = Program.UploadersConfig.FTPAccountList.Count > 0;
+
                 if (Program.UploadersConfig.FTPAccountList.Count > 0)
                 {
                     chkOverrideFTP.Checked = TaskSettings.OverrideFTP;
+                    cboFTPaccounts.Enabled = TaskSettings.OverrideFTP;
                     cboFTPaccounts.Items.Clear();
                     cboFTPaccounts.Items.AddRange(Program.UploadersConfig.FTPAccountList.ToArray());
                     cboFTPaccounts.SelectedIndex = TaskSettings.FTPIndex.BetweenOrDefault(0, Program.UploadersConfig.FTPAccountList.Count - 1);
                 }
 
+                chkOverrideCustomUploader.Enabled = cbOverrideCustomUploader.Enabled = Program.UploadersConfig.CustomUploadersList.Count > 0;
+
                 if (Program.UploadersConfig.CustomUploadersList.Count > 0)
                 {
                     chkOverrideCustomUploader.Checked = TaskSettings.OverrideCustomUploader;
+                    cbOverrideCustomUploader.Enabled = TaskSettings.OverrideCustomUploader;
                     cbOverrideCustomUploader.Items.Clear();
                     cbOverrideCustomUploader.Items.AddRange(Program.UploadersConfig.CustomUploadersList.ToArray());
                     cbOverrideCustomUploader.SelectedIndex = TaskSettings.CustomUploaderIndex.BetweenOrDefault(0, Program.UploadersConfig.CustomUploadersList.Count - 1);
@@ -180,6 +189,8 @@ namespace ShareX
 
             cbImageFormat.Items.AddRange(Enum.GetNames(typeof(EImageFormat)));
             cbImageFormat.SelectedIndex = (int)TaskSettings.ImageSettings.ImageFormat;
+            cbImagePNGBitDepth.Items.AddRange(Helpers.GetLocalizedEnumDescriptions<PNGBitDepth>());
+            cbImagePNGBitDepth.SelectedIndex = (int)TaskSettings.ImageSettings.ImagePNGBitDepth;
             nudImageJPEGQuality.SetValue(TaskSettings.ImageSettings.ImageJPEGQuality);
             cbImageGIFQuality.Items.AddRange(Helpers.GetLocalizedEnumDescriptions<GIFQuality>());
             cbImageGIFQuality.SelectedIndex = (int)TaskSettings.ImageSettings.ImageGIFQuality;
@@ -276,8 +287,6 @@ namespace ShareX
 
             nudScreenRecordFPS.SetValue(TaskSettings.CaptureSettings.ScreenRecordFPS);
             nudGIFFPS.SetValue(TaskSettings.CaptureSettings.GIFFPS);
-            cbGIFEncoding.Items.AddRange(Helpers.GetLocalizedEnumDescriptions<ScreenRecordGIFEncoding>());
-            cbGIFEncoding.SelectedIndex = (int)TaskSettings.CaptureSettings.GIFEncoding;
             cbScreenRecorderFixedDuration.Checked = nudScreenRecorderDuration.Enabled = TaskSettings.CaptureSettings.ScreenRecordFixedDuration;
             nudScreenRecorderDuration.SetValue((decimal)TaskSettings.CaptureSettings.ScreenRecordDuration);
             chkScreenRecordAutoStart.Checked = nudScreenRecorderStartDelay.Enabled = TaskSettings.CaptureSettings.ScreenRecordAutoStart;
@@ -431,8 +440,6 @@ namespace ShareX
                 EnableDisableToolStripMenuItems<FileDestination>(tsmiFileUploaders);
                 EnableDisableToolStripMenuItems<UrlShortenerType>(tsmiURLShorteners);
                 EnableDisableToolStripMenuItems<URLSharingServices>(tsmiURLSharingServices);
-                chkOverrideFTP.Enabled = cboFTPaccounts.Enabled = Program.UploadersConfig.FTPAccountList.Count > 1;
-                chkOverrideCustomUploader.Enabled = cbOverrideCustomUploader.Enabled = Program.UploadersConfig.CustomUploadersList.Count > 1;
             }
         }
 
@@ -636,19 +643,19 @@ namespace ShareX
 
         private void cbUseDefaultAfterCaptureSettings_CheckedChanged(object sender, EventArgs e)
         {
-            TaskSettings.UseDefaultAfterCaptureJob = cbUseDefaultAfterCaptureSettings.Checked;
+            TaskSettings.UseDefaultAfterCaptureJob = !cbOverrideAfterCaptureSettings.Checked;
             btnAfterCapture.Enabled = !TaskSettings.UseDefaultAfterCaptureJob;
         }
 
         private void cbUseDefaultAfterUploadSettings_CheckedChanged(object sender, EventArgs e)
         {
-            TaskSettings.UseDefaultAfterUploadJob = cbUseDefaultAfterUploadSettings.Checked;
+            TaskSettings.UseDefaultAfterUploadJob = !cbOverrideAfterUploadSettings.Checked;
             btnAfterUpload.Enabled = !TaskSettings.UseDefaultAfterUploadJob;
         }
 
         private void cbUseDefaultDestinationSettings_CheckedChanged(object sender, EventArgs e)
         {
-            TaskSettings.UseDefaultDestinations = cbUseDefaultDestinationSettings.Checked;
+            TaskSettings.UseDefaultDestinations = !cbOverrideDestinationSettings.Checked;
             btnDestinations.Enabled = !TaskSettings.UseDefaultDestinations;
         }
 
@@ -680,7 +687,7 @@ namespace ShareX
 
         private void chkUseDefaultGeneralSettings_CheckedChanged(object sender, EventArgs e)
         {
-            TaskSettings.UseDefaultGeneralSettings = chkUseDefaultGeneralSettings.Checked;
+            TaskSettings.UseDefaultGeneralSettings = !chkOverrideGeneralSettings.Checked;
             UpdateDefaultSettingVisibility();
         }
 
@@ -705,13 +712,18 @@ namespace ShareX
 
         private void chkUseDefaultImageSettings_CheckedChanged(object sender, EventArgs e)
         {
-            TaskSettings.UseDefaultImageSettings = chkUseDefaultImageSettings.Checked;
+            TaskSettings.UseDefaultImageSettings = !chkOverrideImageSettings.Checked;
             UpdateDefaultSettingVisibility();
         }
 
         private void cbImageFormat_SelectedIndexChanged(object sender, EventArgs e)
         {
             TaskSettings.ImageSettings.ImageFormat = (EImageFormat)cbImageFormat.SelectedIndex;
+        }
+
+        private void cbImagePNGBitDepth_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            TaskSettings.ImageSettings.ImagePNGBitDepth = (PNGBitDepth)cbImagePNGBitDepth.SelectedIndex;
         }
 
         private void nudImageJPEGQuality_ValueChanged(object sender, EventArgs e)
@@ -790,7 +802,7 @@ namespace ShareX
 
         private void chkUseDefaultCaptureSettings_CheckedChanged(object sender, EventArgs e)
         {
-            TaskSettings.UseDefaultCaptureSettings = chkUseDefaultCaptureSettings.Checked;
+            TaskSettings.UseDefaultCaptureSettings = !chkOverrideCaptureSettings.Checked;
             UpdateDefaultSettingVisibility();
         }
 
@@ -1086,11 +1098,6 @@ namespace ShareX
             }
         }
 
-        private void cbGIFEncoding_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            TaskSettings.CaptureSettings.GIFEncoding = (ScreenRecordGIFEncoding)cbGIFEncoding.SelectedIndex;
-        }
-
         private void cbScreenRecorderFixedDuration_CheckedChanged(object sender, EventArgs e)
         {
             TaskSettings.CaptureSettings.ScreenRecordFixedDuration = cbScreenRecorderFixedDuration.Checked;
@@ -1168,7 +1175,7 @@ namespace ShareX
 
         private void chkUseDefaultUploadSettings_CheckedChanged(object sender, EventArgs e)
         {
-            TaskSettings.UseDefaultUploadSettings = chkUseDefaultUploadSettings.Checked;
+            TaskSettings.UseDefaultUploadSettings = !chkOverrideUploadSettings.Checked;
             UpdateDefaultSettingVisibility();
         }
 
@@ -1351,7 +1358,7 @@ namespace ShareX
 
         private void chkUseDefaultActions_CheckedChanged(object sender, EventArgs e)
         {
-            TaskSettings.UseDefaultActions = chkUseDefaultActions.Checked;
+            TaskSettings.UseDefaultActions = !chkOverrideActions.Checked;
             UpdateDefaultSettingVisibility();
         }
 
@@ -1510,7 +1517,7 @@ namespace ShareX
 
         private void chkUseDefaultToolsSettings_CheckedChanged(object sender, EventArgs e)
         {
-            TaskSettings.UseDefaultToolsSettings = chkUseDefaultToolsSettings.Checked;
+            TaskSettings.UseDefaultToolsSettings = !chkOverrideToolsSettings.Checked;
             UpdateDefaultSettingVisibility();
         }
 
@@ -1525,7 +1532,7 @@ namespace ShareX
 
         private void chkUseDefaultAdvancedSettings_CheckedChanged(object sender, EventArgs e)
         {
-            TaskSettings.UseDefaultAdvancedSettings = chkUseDefaultAdvancedSettings.Checked;
+            TaskSettings.UseDefaultAdvancedSettings = !chkOverrideAdvancedSettings.Checked;
             UpdateDefaultSettingVisibility();
         }
 

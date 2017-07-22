@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -27,6 +27,7 @@ using ShareX.HelpersLib;
 using ShareX.ScreenCaptureLib.Properties;
 using System;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -36,13 +37,18 @@ namespace ShareX.ScreenCaptureLib
     {
         public bool IsMenuCollapsed { get; private set; }
 
-        internal TextAnimation MenuTextAnimation = new TextAnimation(TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(0.5));
+        internal TextAnimation MenuTextAnimation = new TextAnimation()
+        {
+            FadeInDuration = TimeSpan.FromMilliseconds(0),
+            Duration = TimeSpan.FromMilliseconds(5000),
+            FadeOutDuration = TimeSpan.FromMilliseconds(500)
+        };
 
         private Form menuForm;
         private ToolStripEx tsMain;
-        private ToolStripButton tsbBorderColor, tsbFillColor, tsbHighlightColor, tsbUndoObject, tsbDeleteAll;
+        private ToolStripButton tsbBorderColor, tsbFillColor, tsbHighlightColor;
         private ToolStripDropDownButton tsddbShapeOptions;
-        private ToolStripMenuItem tsmiQuickCrop, tsmiRegionCapture;
+        private ToolStripMenuItem tsmiShadow, tsmiUndo, tsmiDelete, tsmiDeleteAll, tsmiMoveTop, tsmiMoveUp, tsmiMoveDown, tsmiMoveBottom, tsmiRegionCapture, tsmiQuickCrop, tsmiTips;
         private ToolStripLabeledNumericUpDown tslnudBorderSize, tslnudCornerRadius, tslnudBlurRadius, tslnudPixelateSize;
         private ToolStripLabel tslDragLeft;
 
@@ -63,6 +69,8 @@ namespace ShareX.ScreenCaptureLib
                 TopMost = true
             };
 
+            menuForm.Shown += MenuForm_Shown;
+            menuForm.KeyDown += MenuForm_KeyDown;
             menuForm.KeyUp += MenuForm_KeyUp;
             menuForm.LocationChanged += MenuForm_LocationChanged;
 
@@ -77,7 +85,7 @@ namespace ShareX.ScreenCaptureLib
                 GripStyle = ToolStripGripStyle.Hidden,
                 Location = new Point(0, 0),
                 MinimumSize = new Size(10, 30),
-                Padding = new Padding(0, 0, 0, 0),
+                Padding = new Padding(0, 1, 0, 0),
                 Renderer = new CustomToolStripProfessionalRenderer(),
                 TabIndex = 0,
                 ShowItemToolTips = false
@@ -112,57 +120,87 @@ namespace ShareX.ScreenCaptureLib
 
             tsMain.Items.Add(tslDragLeft);
 
-            #region Editor mode
-
-            if (form.Mode == RegionCaptureMode.Editor)
+            if (form.IsEditorMode)
             {
-                ToolStripButton tsbCompleteEdit = new ToolStripButton("Run after capture tasks");
+                #region Editor mode
+
+                ToolStripButton tsbCompleteEdit = new ToolStripButton();
+
+                if (form.Mode == RegionCaptureMode.Editor)
+                {
+                    tsbCompleteEdit.Text = Resources.ShapeManager_CreateToolbar_RunAfterCaptureTasks;
+                }
+                else
+                {
+                    tsbCompleteEdit.Text = Resources.ShapeManager_CreateToolbar_ApplyChangesContinueTaskEnter;
+                }
+
                 tsbCompleteEdit.DisplayStyle = ToolStripItemDisplayStyle.Image;
                 tsbCompleteEdit.Image = Resources.tick;
                 tsbCompleteEdit.MouseDown += (sender, e) => form.Close(RegionResult.AnnotateRunAfterCaptureTasks);
                 tsMain.Items.Add(tsbCompleteEdit);
 
-                ToolStripButton tsbSaveImage = new ToolStripButton("Save image");
+                if (form.Mode == RegionCaptureMode.TaskEditor)
+                {
+                    ToolStripButton tsbClose = new ToolStripButton(Resources.ShapeManager_CreateToolbar_ContinueTaskSpaceOrRightClick);
+                    tsbClose.DisplayStyle = ToolStripItemDisplayStyle.Image;
+                    tsbClose.Image = Resources.control;
+                    tsbClose.MouseDown += (sender, e) => form.Close(RegionResult.AnnotateContinueTask);
+                    tsMain.Items.Add(tsbClose);
+
+                    ToolStripButton tsbCloseCancel = new ToolStripButton(Resources.ShapeManager_CreateToolbar_CancelTaskEsc);
+                    tsbCloseCancel.DisplayStyle = ToolStripItemDisplayStyle.Image;
+                    tsbCloseCancel.Image = Resources.cross;
+                    tsbCloseCancel.MouseDown += (sender, e) => form.Close(RegionResult.AnnotateCancelTask);
+                    tsMain.Items.Add(tsbCloseCancel);
+                }
+
+                if (form.Mode == RegionCaptureMode.TaskEditor)
+                {
+                    tsMain.Items.Add(new ToolStripSeparator());
+                }
+
+                ToolStripButton tsbSaveImage = new ToolStripButton(Resources.ShapeManager_CreateToolbar_SaveImage);
                 tsbSaveImage.DisplayStyle = ToolStripItemDisplayStyle.Image;
-                tsbSaveImage.Enabled = !string.IsNullOrEmpty(form.ImageFilePath);
+                tsbSaveImage.Enabled = File.Exists(form.ImageFilePath);
                 tsbSaveImage.Image = Resources.disk_black;
                 tsbSaveImage.MouseDown += (sender, e) => form.Close(RegionResult.AnnotateSaveImage);
                 tsMain.Items.Add(tsbSaveImage);
 
-                ToolStripButton tsbSaveImageAs = new ToolStripButton("Save image as...");
+                ToolStripButton tsbSaveImageAs = new ToolStripButton(Resources.ShapeManager_CreateToolbar_SaveImageAs);
                 tsbSaveImageAs.DisplayStyle = ToolStripItemDisplayStyle.Image;
                 tsbSaveImageAs.Image = Resources.disks_black;
                 tsbSaveImageAs.MouseDown += (sender, e) => form.Close(RegionResult.AnnotateSaveImageAs);
                 tsMain.Items.Add(tsbSaveImageAs);
 
-                ToolStripButton tsbCopyImage = new ToolStripButton("Copy image to clipboard");
+                ToolStripButton tsbCopyImage = new ToolStripButton(Resources.ShapeManager_CreateToolbar_CopyImageToClipboard);
                 tsbCopyImage.DisplayStyle = ToolStripItemDisplayStyle.Image;
                 tsbCopyImage.Image = Resources.clipboard;
                 tsbCopyImage.MouseDown += (sender, e) => form.Close(RegionResult.AnnotateCopyImage);
                 tsMain.Items.Add(tsbCopyImage);
 
-                ToolStripButton tsbUploadImage = new ToolStripButton("Upload image");
+                ToolStripButton tsbUploadImage = new ToolStripButton(Resources.ShapeManager_CreateToolbar_UploadImage);
                 tsbUploadImage.DisplayStyle = ToolStripItemDisplayStyle.Image;
                 tsbUploadImage.Image = Resources.drive_globe;
                 tsbUploadImage.MouseDown += (sender, e) => form.Close(RegionResult.AnnotateUploadImage);
                 tsMain.Items.Add(tsbUploadImage);
 
-                ToolStripButton tsbPrintImage = new ToolStripButton("Print image...");
+                ToolStripButton tsbPrintImage = new ToolStripButton(Resources.ShapeManager_CreateToolbar_PrintImage);
                 tsbPrintImage.DisplayStyle = ToolStripItemDisplayStyle.Image;
                 tsbPrintImage.Image = Resources.printer;
                 tsbPrintImage.MouseDown += (sender, e) => form.Close(RegionResult.AnnotatePrintImage);
                 tsMain.Items.Add(tsbPrintImage);
 
                 tsMain.Items.Add(new ToolStripSeparator());
-            }
 
-            #endregion Editor mode
+                #endregion Editor mode
+            }
 
             #region Tools
 
             foreach (ShapeType shapeType in Helpers.GetEnums<ShapeType>())
             {
-                if (form.Mode == RegionCaptureMode.Editor)
+                if (form.IsEditorMode)
                 {
                     if (IsShapeTypeRegion(shapeType))
                     {
@@ -172,6 +210,10 @@ namespace ShareX.ScreenCaptureLib
                 else if (shapeType == ShapeType.DrawingRectangle)
                 {
                     tsMain.Items.Add(new ToolStripSeparator());
+                }
+                else if (shapeType == ShapeType.DrawingCrop)
+                {
+                    continue;
                 }
 
                 ToolStripButton tsbShapeType = new ToolStripButton(shapeType.GetLocalizedDescription());
@@ -184,9 +226,6 @@ namespace ShareX.ScreenCaptureLib
                     case ShapeType.RegionRectangle:
                         img = Resources.layer_shape_region;
                         break;
-                    case ShapeType.RegionRoundedRectangle:
-                        img = Resources.layer_shape_round_region;
-                        break;
                     case ShapeType.RegionEllipse:
                         img = Resources.layer_shape_ellipse_region;
                         break;
@@ -196,14 +235,11 @@ namespace ShareX.ScreenCaptureLib
                     case ShapeType.DrawingRectangle:
                         img = Resources.layer_shape;
                         break;
-                    case ShapeType.DrawingRoundedRectangle:
-                        img = Resources.layer_shape_round;
-                        break;
                     case ShapeType.DrawingEllipse:
                         img = Resources.layer_shape_ellipse;
                         break;
                     case ShapeType.DrawingFreehand:
-                        img = Resources.layer_shape_curve;
+                        img = Resources.pencil;
                         break;
                     case ShapeType.DrawingLine:
                         img = Resources.layer_shape_line;
@@ -211,8 +247,11 @@ namespace ShareX.ScreenCaptureLib
                     case ShapeType.DrawingArrow:
                         img = Resources.layer_shape_arrow;
                         break;
-                    case ShapeType.DrawingText:
-                        img = Resources.layer_shape_text;
+                    case ShapeType.DrawingTextOutline:
+                        img = Resources.edit_outline;
+                        break;
+                    case ShapeType.DrawingTextBackground:
+                        img = Resources.edit_shade;
                         break;
                     case ShapeType.DrawingSpeechBalloon:
                         img = Resources.balloon_box_left;
@@ -221,7 +260,13 @@ namespace ShareX.ScreenCaptureLib
                         img = Resources.counter_reset;
                         break;
                     case ShapeType.DrawingImage:
-                        img = Resources.image;
+                        img = Resources.folder_open_image;
+                        break;
+                    case ShapeType.DrawingImageScreen:
+                        img = Resources.monitor_image;
+                        break;
+                    case ShapeType.DrawingCursor:
+                        img = Resources.cursor;
                         break;
                     case ShapeType.EffectBlur:
                         img = Resources.layer_shade;
@@ -231,6 +276,9 @@ namespace ShareX.ScreenCaptureLib
                         break;
                     case ShapeType.EffectHighlight:
                         img = Resources.highlighter_text;
+                        break;
+                    case ShapeType.DrawingCrop:
+                        img = Resources.image_crop;
                         break;
                 }
 
@@ -249,7 +297,7 @@ namespace ShareX.ScreenCaptureLib
 
             #endregion Tools
 
-            #region Selected object
+            #region Shape options
 
             tsMain.Items.Add(new ToolStripSeparator());
 
@@ -263,9 +311,13 @@ namespace ShareX.ScreenCaptureLib
 
                 Color borderColor;
 
-                if (shapeType == ShapeType.DrawingText || shapeType == ShapeType.DrawingSpeechBalloon)
+                if (shapeType == ShapeType.DrawingTextBackground || shapeType == ShapeType.DrawingSpeechBalloon)
                 {
                     borderColor = AnnotationOptions.TextBorderColor;
+                }
+                else if (shapeType == ShapeType.DrawingTextOutline)
+                {
+                    borderColor = AnnotationOptions.TextOutlineBorderColor;
                 }
                 else if (shapeType == ShapeType.DrawingStep)
                 {
@@ -276,26 +328,27 @@ namespace ShareX.ScreenCaptureLib
                     borderColor = AnnotationOptions.BorderColor;
                 }
 
-                using (ColorPickerForm dialogColor = new ColorPickerForm(borderColor))
+                if (ColorPickerForm.PickColor(borderColor, out Color newColor))
                 {
-                    if (dialogColor.ShowDialog() == DialogResult.OK)
+                    if (shapeType == ShapeType.DrawingTextBackground || shapeType == ShapeType.DrawingSpeechBalloon)
                     {
-                        if (shapeType == ShapeType.DrawingText || shapeType == ShapeType.DrawingSpeechBalloon)
-                        {
-                            AnnotationOptions.TextBorderColor = dialogColor.NewColor;
-                        }
-                        else if (shapeType == ShapeType.DrawingStep)
-                        {
-                            AnnotationOptions.StepBorderColor = dialogColor.NewColor;
-                        }
-                        else
-                        {
-                            AnnotationOptions.BorderColor = dialogColor.NewColor;
-                        }
-
-                        UpdateMenu();
-                        UpdateCurrentShape();
+                        AnnotationOptions.TextBorderColor = newColor;
                     }
+                    else if (shapeType == ShapeType.DrawingTextOutline)
+                    {
+                        AnnotationOptions.TextOutlineBorderColor = newColor;
+                    }
+                    else if (shapeType == ShapeType.DrawingStep)
+                    {
+                        AnnotationOptions.StepBorderColor = newColor;
+                    }
+                    else
+                    {
+                        AnnotationOptions.BorderColor = newColor;
+                    }
+
+                    UpdateMenu();
+                    UpdateCurrentShape();
                 }
 
                 ResumeForm();
@@ -312,7 +365,7 @@ namespace ShareX.ScreenCaptureLib
 
                 Color fillColor;
 
-                if (shapeType == ShapeType.DrawingText || shapeType == ShapeType.DrawingSpeechBalloon)
+                if (shapeType == ShapeType.DrawingTextBackground || shapeType == ShapeType.DrawingSpeechBalloon)
                 {
                     fillColor = AnnotationOptions.TextFillColor;
                 }
@@ -325,26 +378,23 @@ namespace ShareX.ScreenCaptureLib
                     fillColor = AnnotationOptions.FillColor;
                 }
 
-                using (ColorPickerForm dialogColor = new ColorPickerForm(fillColor))
+                if (ColorPickerForm.PickColor(fillColor, out Color newColor))
                 {
-                    if (dialogColor.ShowDialog() == DialogResult.OK)
+                    if (shapeType == ShapeType.DrawingTextBackground || shapeType == ShapeType.DrawingSpeechBalloon)
                     {
-                        if (shapeType == ShapeType.DrawingText || shapeType == ShapeType.DrawingSpeechBalloon)
-                        {
-                            AnnotationOptions.TextFillColor = dialogColor.NewColor;
-                        }
-                        else if (shapeType == ShapeType.DrawingStep)
-                        {
-                            AnnotationOptions.StepFillColor = dialogColor.NewColor;
-                        }
-                        else
-                        {
-                            AnnotationOptions.FillColor = dialogColor.NewColor;
-                        }
-
-                        UpdateMenu();
-                        UpdateCurrentShape();
+                        AnnotationOptions.TextFillColor = newColor;
                     }
+                    else if (shapeType == ShapeType.DrawingStep)
+                    {
+                        AnnotationOptions.StepFillColor = newColor;
+                    }
+                    else
+                    {
+                        AnnotationOptions.FillColor = newColor;
+                    }
+
+                    UpdateMenu();
+                    UpdateCurrentShape();
                 }
 
                 ResumeForm();
@@ -357,23 +407,19 @@ namespace ShareX.ScreenCaptureLib
             {
                 PauseForm();
 
-                using (ColorPickerForm dialogColor = new ColorPickerForm(AnnotationOptions.HighlightColor))
+                if (ColorPickerForm.PickColor(AnnotationOptions.HighlightColor, out Color newColor))
                 {
-                    if (dialogColor.ShowDialog() == DialogResult.OK)
-                    {
-                        AnnotationOptions.HighlightColor = dialogColor.NewColor;
-                        UpdateMenu();
-                        UpdateCurrentShape();
-                    }
+                    AnnotationOptions.HighlightColor = newColor;
+                    UpdateMenu();
+                    UpdateCurrentShape();
                 }
 
                 ResumeForm();
             };
             tsMain.Items.Add(tsbHighlightColor);
 
-            tsddbShapeOptions = new ToolStripDropDownButton("Shape options");
+            tsddbShapeOptions = new ToolStripDropDownButton(Resources.ShapeManager_CreateToolbar_ShapeOptions);
             tsddbShapeOptions.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            tsddbShapeOptions.HideImageMargin();
             tsddbShapeOptions.Image = Resources.layer__pencil;
             tsMain.Items.Add(tsddbShapeOptions);
 
@@ -386,9 +432,13 @@ namespace ShareX.ScreenCaptureLib
 
                 int borderSize = (int)tslnudBorderSize.Content.Value;
 
-                if (shapeType == ShapeType.DrawingText || shapeType == ShapeType.DrawingSpeechBalloon)
+                if (shapeType == ShapeType.DrawingTextBackground || shapeType == ShapeType.DrawingSpeechBalloon)
                 {
                     AnnotationOptions.TextBorderSize = borderSize;
+                }
+                else if (shapeType == ShapeType.DrawingTextOutline)
+                {
+                    AnnotationOptions.TextOutlineBorderSize = borderSize;
                 }
                 else if (shapeType == ShapeType.DrawingStep)
                 {
@@ -406,18 +456,17 @@ namespace ShareX.ScreenCaptureLib
             tslnudCornerRadius = new ToolStripLabeledNumericUpDown(Resources.ShapeManager_CreateContextMenu_Corner_radius_);
             tslnudCornerRadius.Content.Minimum = 0;
             tslnudCornerRadius.Content.Maximum = 150;
-            tslnudCornerRadius.Content.Increment = 3;
             tslnudCornerRadius.Content.ValueChanged = (sender, e) =>
             {
                 ShapeType shapeType = CurrentShapeType;
 
-                if (shapeType == ShapeType.RegionRoundedRectangle || shapeType == ShapeType.DrawingRoundedRectangle)
+                if (shapeType == ShapeType.RegionRectangle)
                 {
-                    AnnotationOptions.RoundedRectangleRadius = (int)tslnudCornerRadius.Content.Value;
+                    AnnotationOptions.RegionCornerRadius = (int)tslnudCornerRadius.Content.Value;
                 }
-                else if (shapeType == ShapeType.DrawingText)
+                else if (shapeType == ShapeType.DrawingRectangle || shapeType == ShapeType.DrawingTextBackground)
                 {
-                    AnnotationOptions.TextCornerRadius = (int)tslnudCornerRadius.Content.Value;
+                    AnnotationOptions.DrawingCornerRadius = (int)tslnudCornerRadius.Content.Value;
                 }
 
                 UpdateCurrentShape();
@@ -425,8 +474,9 @@ namespace ShareX.ScreenCaptureLib
             tsddbShapeOptions.DropDownItems.Add(tslnudCornerRadius);
 
             tslnudBlurRadius = new ToolStripLabeledNumericUpDown(Resources.ShapeManager_CreateContextMenu_Blur_radius_);
-            tslnudBlurRadius.Content.Minimum = 2;
-            tslnudBlurRadius.Content.Maximum = 100;
+            tslnudBlurRadius.Content.Minimum = 3;
+            tslnudBlurRadius.Content.Maximum = 199;
+            tslnudBlurRadius.Content.Increment = 2;
             tslnudBlurRadius.Content.ValueChanged = (sender, e) =>
             {
                 AnnotationOptions.BlurRadius = (int)tslnudBlurRadius.Content.Value;
@@ -436,7 +486,7 @@ namespace ShareX.ScreenCaptureLib
 
             tslnudPixelateSize = new ToolStripLabeledNumericUpDown(Resources.ShapeManager_CreateContextMenu_Pixel_size_);
             tslnudPixelateSize.Content.Minimum = 2;
-            tslnudPixelateSize.Content.Maximum = 100;
+            tslnudPixelateSize.Content.Maximum = 10000;
             tslnudPixelateSize.Content.ValueChanged = (sender, e) =>
             {
                 AnnotationOptions.PixelateSize = (int)tslnudPixelateSize.Content.Value;
@@ -444,36 +494,90 @@ namespace ShareX.ScreenCaptureLib
             };
             tsddbShapeOptions.DropDownItems.Add(tslnudPixelateSize);
 
+            tsmiShadow = new ToolStripMenuItem(Resources.ShapeManager_CreateToolbar_DropShadow);
+            tsmiShadow.Checked = true;
+            tsmiShadow.CheckOnClick = true;
+            tsmiShadow.Click += (sender, e) =>
+            {
+                AnnotationOptions.Shadow = tsmiShadow.Checked;
+                UpdateCurrentShape();
+            };
+            tsddbShapeOptions.DropDownItems.Add(tsmiShadow);
+
             // In dropdown menu if only last item is visible then menu opens at 0, 0 position on first open, so need to add dummy item to solve this weird bug...
             tsddbShapeOptions.DropDownItems.Add(new ToolStripSeparator() { Visible = false });
 
-            tsbUndoObject = new ToolStripButton("Undo object");
-            tsbUndoObject.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            tsbUndoObject.Image = Resources.arrow_circle_225_left;
-            tsbUndoObject.MouseDown += (sender, e) => UndoShape();
-            tsMain.Items.Add(tsbUndoObject);
+            #endregion Shape options
 
-            tsbDeleteAll = new ToolStripButton(Resources.ShapeManager_CreateContextMenu_Delete_all_objects);
-            tsbDeleteAll.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            tsbDeleteAll.Image = Resources.eraser;
-            tsbDeleteAll.MouseDown += (sender, e) => DeleteAllShapes();
-            tsMain.Items.Add(tsbDeleteAll);
+            #region Edit
 
-            #endregion Selected object
+            ToolStripDropDownButton tsddbEdit = new ToolStripDropDownButton(Resources.ShapeManager_CreateToolbar_Edit);
+            tsddbEdit.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            tsddbEdit.Image = Resources.wrench_screwdriver;
+            tsMain.Items.Add(tsddbEdit);
 
-            #region Capture
+            tsmiUndo = new ToolStripMenuItem(Resources.ShapeManager_CreateToolbar_Undo);
+            tsmiUndo.Image = Resources.arrow_circle_225_left;
+            tsmiUndo.ShortcutKeyDisplayString = "Ctrl+Z";
+            tsmiUndo.MouseDown += (sender, e) => UndoShape();
+            tsddbEdit.DropDownItems.Add(tsmiUndo);
 
-            if (form.Mode != RegionCaptureMode.Editor)
+            tsddbEdit.DropDownItems.Add(new ToolStripSeparator());
+
+            tsmiDelete = new ToolStripMenuItem(Resources.ShapeManager_CreateToolbar_Delete);
+            tsmiDelete.Image = Resources.layer__minus;
+            tsmiDelete.ShortcutKeyDisplayString = "Del";
+            tsmiDelete.MouseDown += (sender, e) => DeleteCurrentShape();
+            tsddbEdit.DropDownItems.Add(tsmiDelete);
+
+            tsmiDeleteAll = new ToolStripMenuItem(Resources.ShapeManager_CreateToolbar_DeleteAll);
+            tsmiDeleteAll.Image = Resources.eraser;
+            tsmiDeleteAll.ShortcutKeyDisplayString = "Shift+Del";
+            tsmiDeleteAll.MouseDown += (sender, e) => DeleteAllShapes();
+            tsddbEdit.DropDownItems.Add(tsmiDeleteAll);
+
+            tsddbEdit.DropDownItems.Add(new ToolStripSeparator());
+
+            tsmiMoveTop = new ToolStripMenuItem(Resources.ShapeManager_CreateToolbar_BringToFront);
+            tsmiMoveTop.Image = Resources.layers_stack_arrange;
+            tsmiMoveTop.ShortcutKeyDisplayString = "Home";
+            tsmiMoveTop.MouseDown += (sender, e) => MoveCurrentShapeTop();
+            tsddbEdit.DropDownItems.Add(tsmiMoveTop);
+
+            tsmiMoveUp = new ToolStripMenuItem(Resources.ShapeManager_CreateToolbar_BringForward);
+            tsmiMoveUp.Image = Resources.layers_arrange;
+            tsmiMoveUp.ShortcutKeyDisplayString = "Page up";
+            tsmiMoveUp.MouseDown += (sender, e) => MoveCurrentShapeUp();
+            tsddbEdit.DropDownItems.Add(tsmiMoveUp);
+
+            tsmiMoveDown = new ToolStripMenuItem(Resources.ShapeManager_CreateToolbar_SendBackward);
+            tsmiMoveDown.Image = Resources.layers_arrange_back;
+            tsmiMoveDown.ShortcutKeyDisplayString = "Page down";
+            tsmiMoveDown.MouseDown += (sender, e) => MoveCurrentShapeDown();
+            tsddbEdit.DropDownItems.Add(tsmiMoveDown);
+
+            tsmiMoveBottom = new ToolStripMenuItem(Resources.ShapeManager_CreateToolbar_SendToBack);
+            tsmiMoveBottom.Image = Resources.layers_stack_arrange_back;
+            tsmiMoveBottom.ShortcutKeyDisplayString = "End";
+            tsmiMoveBottom.MouseDown += (sender, e) => MoveCurrentShapeBottom();
+            tsddbEdit.DropDownItems.Add(tsmiMoveBottom);
+
+            #endregion Edit
+
+            if (!form.IsEditorMode)
             {
                 tsMain.Items.Add(new ToolStripSeparator());
 
-                ToolStripDropDownButton tsddbCapture = new ToolStripDropDownButton("Capture");
+                #region Capture
+
+                ToolStripDropDownButton tsddbCapture = new ToolStripDropDownButton(Resources.ShapeManager_CreateContextMenu_Capture);
                 tsddbCapture.DisplayStyle = ToolStripItemDisplayStyle.Image;
                 tsddbCapture.Image = Resources.camera;
                 tsMain.Items.Add(tsddbCapture);
 
-                tsmiRegionCapture = new ToolStripMenuItem("Capture regions");
-                tsmiRegionCapture.Image = Resources.layers;
+                tsmiRegionCapture = new ToolStripMenuItem(Resources.ShapeManager_CreateToolbar_CaptureRegions);
+                tsmiRegionCapture.Image = Resources.layer;
+                tsmiRegionCapture.ShortcutKeyDisplayString = "Enter";
                 tsmiRegionCapture.MouseDown += (sender, e) =>
                 {
                     form.UpdateRegionPath();
@@ -481,13 +585,23 @@ namespace ShareX.ScreenCaptureLib
                 };
                 tsddbCapture.DropDownItems.Add(tsmiRegionCapture);
 
+                if (RegionCaptureForm.LastRegionFillPath != null)
+                {
+                    ToolStripMenuItem tsmiLastRegionCapture = new ToolStripMenuItem(Resources.ShapeManager_CreateToolbar_LastRegion);
+                    tsmiLastRegionCapture.Image = Resources.layers;
+                    tsmiLastRegionCapture.MouseDown += (sender, e) => form.Close(RegionResult.LastRegion);
+                    tsddbCapture.DropDownItems.Add(tsmiLastRegionCapture);
+                }
+
                 ToolStripMenuItem tsmiFullscreenCapture = new ToolStripMenuItem(Resources.ShapeManager_CreateContextMenu_Capture_fullscreen);
                 tsmiFullscreenCapture.Image = Resources.layer_fullscreen;
+                tsmiFullscreenCapture.ShortcutKeyDisplayString = "Space";
                 tsmiFullscreenCapture.MouseDown += (sender, e) => form.Close(RegionResult.Fullscreen);
                 tsddbCapture.DropDownItems.Add(tsmiFullscreenCapture);
 
                 ToolStripMenuItem tsmiActiveMonitorCapture = new ToolStripMenuItem(Resources.ShapeManager_CreateContextMenu_Capture_active_monitor);
                 tsmiActiveMonitorCapture.Image = Resources.monitor;
+                tsmiActiveMonitorCapture.ShortcutKeyDisplayString = "~";
                 tsmiActiveMonitorCapture.MouseDown += (sender, e) => form.Close(RegionResult.ActiveMonitor);
                 tsddbCapture.DropDownItems.Add(tsmiActiveMonitorCapture);
 
@@ -501,7 +615,8 @@ namespace ShareX.ScreenCaptureLib
                 for (int i = 0; i < screens.Length; i++)
                 {
                     Screen screen = screens[i];
-                    ToolStripMenuItem tsmi = new ToolStripMenuItem(string.Format("{0}. {1}x{2}", i + 1, screen.Bounds.Width, screen.Bounds.Height));
+                    ToolStripMenuItem tsmi = new ToolStripMenuItem($"{screen.Bounds.Width}x{screen.Bounds.Height}");
+                    tsmi.ShortcutKeyDisplayString = (i + 1).ToString();
                     int index = i;
                     tsmi.MouseDown += (sender, e) =>
                     {
@@ -510,15 +625,10 @@ namespace ShareX.ScreenCaptureLib
                     };
                     tsmiMonitorCapture.DropDownItems.Add(tsmi);
                 }
-            }
 
-            #endregion Capture
+                #endregion Capture
 
-            #region Options
-
-            if (form.Mode != RegionCaptureMode.Editor)
-            {
-                tsMain.Items.Add(new ToolStripSeparator());
+                #region Options
 
                 ToolStripDropDownButton tsddbOptions = new ToolStripDropDownButton(Resources.ShapeManager_CreateContextMenu_Options);
                 tsddbOptions.DisplayStyle = ToolStripItemDisplayStyle.Image;
@@ -528,12 +638,14 @@ namespace ShareX.ScreenCaptureLib
                 tsmiQuickCrop = new ToolStripMenuItem(Resources.ShapeManager_CreateContextMenu_Multi_region_mode);
                 tsmiQuickCrop.Checked = !Config.QuickCrop;
                 tsmiQuickCrop.CheckOnClick = true;
+                tsmiQuickCrop.ShortcutKeyDisplayString = "Q";
                 tsmiQuickCrop.Click += (sender, e) => Config.QuickCrop = !tsmiQuickCrop.Checked;
                 tsddbOptions.DropDownItems.Add(tsmiQuickCrop);
 
-                ToolStripMenuItem tsmiTips = new ToolStripMenuItem(Resources.ShapeManager_CreateContextMenu_Show_tips);
+                tsmiTips = new ToolStripMenuItem(Resources.ShapeManager_CreateContextMenu_Show_tips);
                 tsmiTips.Checked = Config.ShowHotkeys;
                 tsmiTips.CheckOnClick = true;
+                tsmiTips.ShortcutKeyDisplayString = "F1";
                 tsmiTips.Click += (sender, e) => Config.ShowHotkeys = tsmiTips.Checked;
                 tsddbOptions.DropDownItems.Add(tsmiTips);
 
@@ -576,6 +688,12 @@ namespace ShareX.ScreenCaptureLib
                 tsmiShowCrosshair.Click += (sender, e) => Config.ShowCrosshair = tsmiShowCrosshair.Checked;
                 tsddbOptions.DropDownItems.Add(tsmiShowCrosshair);
 
+                ToolStripMenuItem tsmiEnableAnimations = new ToolStripMenuItem(Resources.ShapeManager_CreateContextMenu_EnableAnimations);
+                tsmiEnableAnimations.Checked = Config.EnableAnimations;
+                tsmiEnableAnimations.CheckOnClick = true;
+                tsmiEnableAnimations.Click += (sender, e) => Config.EnableAnimations = tsmiEnableAnimations.Checked;
+                tsddbOptions.DropDownItems.Add(tsmiEnableAnimations);
+
                 ToolStripMenuItem tsmiFixedSize = new ToolStripMenuItem(Resources.ShapeManager_CreateContextMenu_Fixed_size_region_mode);
                 tsmiFixedSize.Checked = Config.IsFixedSize;
                 tsmiFixedSize.CheckOnClick = true;
@@ -598,14 +716,14 @@ namespace ShareX.ScreenCaptureLib
                 tsmiShowFPS.Click += (sender, e) => Config.ShowFPS = tsmiShowFPS.Checked;
                 tsddbOptions.DropDownItems.Add(tsmiShowFPS);
 
-                ToolStripMenuItem tsmiRememberMenuState = new ToolStripMenuItem("Remember menu state");
+                ToolStripMenuItem tsmiRememberMenuState = new ToolStripMenuItem(Resources.ShapeManager_CreateContextMenu_RememberMenuState);
                 tsmiRememberMenuState.Checked = Config.RememberMenuState;
                 tsmiRememberMenuState.CheckOnClick = true;
                 tsmiRememberMenuState.Click += (sender, e) => Config.RememberMenuState = tsmiRememberMenuState.Checked;
                 tsddbOptions.DropDownItems.Add(tsmiRememberMenuState);
-            }
 
-            #endregion Options
+                #endregion Options
+            }
 
             ToolStripLabel tslDragRight = new ToolStripLabel()
             {
@@ -625,12 +743,6 @@ namespace ShareX.ScreenCaptureLib
             tslDragLeft.MouseLeave += TslDrag_MouseLeave;
             tslDragRight.MouseLeave += TslDrag_MouseLeave;
 
-            tsMain.ResumeLayout(false);
-            tsMain.PerformLayout();
-            menuForm.ResumeLayout(false);
-
-            menuForm.Show(form);
-
             foreach (ToolStripItem tsi in tsMain.Items.OfType<ToolStripItem>())
             {
                 if (!string.IsNullOrEmpty(tsi.Text))
@@ -639,31 +751,61 @@ namespace ShareX.ScreenCaptureLib
                     {
                         Point pos = CaptureHelpers.ScreenToClient(menuForm.PointToScreen(tsi.Bounds.Location));
                         pos.Y += tsi.Height + 8;
+
+                        MenuTextAnimation.Text = tsi.Text;
                         MenuTextAnimation.Position = pos;
-                        MenuTextAnimation.Start(tsi.Text);
+                        MenuTextAnimation.Start();
                     };
 
                     tsi.MouseLeave += TsMain_MouseLeave;
                 }
             }
 
+            tsMain.ResumeLayout(false);
+            tsMain.PerformLayout();
+            menuForm.ResumeLayout(false);
+
+            menuForm.Show(form);
+
             UpdateMenu();
 
-            CurrentShapeTypeChanged += shapeType => UpdateMenu();
-
             CurrentShapeChanged += shape => UpdateMenu();
+            CurrentShapeTypeChanged += shapeType => UpdateMenu();
+            ShapeCreated += shape => UpdateMenu();
 
             ConfigureMenuState();
 
             form.Activate();
         }
 
+        private void MenuForm_Shown(object sender, EventArgs e)
+        {
+            form.toolbarAnimationRectangle = CaptureHelpers.ScreenToClient(menuForm.Bounds);
+
+            form.toolbarAnimation = new OpacityAnimation()
+            {
+                FadeInDuration = TimeSpan.FromMilliseconds(500),
+                Duration = TimeSpan.FromMilliseconds(500),
+                FadeOutDuration = TimeSpan.FromMilliseconds(500)
+            };
+
+            form.toolbarAnimation.Start();
+        }
+
+        private void MenuForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            form_KeyDown(sender, e);
+            form.RegionCaptureForm_KeyDown(sender, e);
+
+            e.Handled = true;
+        }
+
         private void MenuForm_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.KeyData == Keys.Escape)
-            {
-                form.Close();
-            }
+            form_KeyUp(sender, e);
+            form.RegionCaptureForm_KeyUp(sender, e);
+
+            e.Handled = true;
         }
 
         private void MenuForm_LocationChanged(object sender, EventArgs e)
@@ -823,9 +965,13 @@ namespace ShareX.ScreenCaptureLib
 
             Color borderColor;
 
-            if (shapeType == ShapeType.DrawingText || shapeType == ShapeType.DrawingSpeechBalloon)
+            if (shapeType == ShapeType.DrawingTextBackground || shapeType == ShapeType.DrawingSpeechBalloon)
             {
                 borderColor = AnnotationOptions.TextBorderColor;
+            }
+            else if (shapeType == ShapeType.DrawingTextOutline)
+            {
+                borderColor = AnnotationOptions.TextOutlineBorderColor;
             }
             else if (shapeType == ShapeType.DrawingStep)
             {
@@ -841,9 +987,13 @@ namespace ShareX.ScreenCaptureLib
 
             int borderSize;
 
-            if (shapeType == ShapeType.DrawingText || shapeType == ShapeType.DrawingSpeechBalloon)
+            if (shapeType == ShapeType.DrawingTextBackground || shapeType == ShapeType.DrawingSpeechBalloon)
             {
                 borderSize = AnnotationOptions.TextBorderSize;
+            }
+            else if (shapeType == ShapeType.DrawingTextOutline)
+            {
+                borderSize = AnnotationOptions.TextOutlineBorderSize;
             }
             else if (shapeType == ShapeType.DrawingStep)
             {
@@ -858,7 +1008,7 @@ namespace ShareX.ScreenCaptureLib
 
             Color fillColor;
 
-            if (shapeType == ShapeType.DrawingText || shapeType == ShapeType.DrawingSpeechBalloon)
+            if (shapeType == ShapeType.DrawingTextBackground || shapeType == ShapeType.DrawingSpeechBalloon)
             {
                 fillColor = AnnotationOptions.TextFillColor;
             }
@@ -876,13 +1026,13 @@ namespace ShareX.ScreenCaptureLib
 
             int cornerRadius = 0;
 
-            if (shapeType == ShapeType.RegionRoundedRectangle || shapeType == ShapeType.DrawingRoundedRectangle)
+            if (shapeType == ShapeType.RegionRectangle)
             {
-                cornerRadius = AnnotationOptions.RoundedRectangleRadius;
+                cornerRadius = AnnotationOptions.RegionCornerRadius;
             }
-            else if (shapeType == ShapeType.DrawingText)
+            else if (shapeType == ShapeType.DrawingRectangle || shapeType == ShapeType.DrawingTextBackground)
             {
-                cornerRadius = AnnotationOptions.TextCornerRadius;
+                cornerRadius = AnnotationOptions.DrawingCornerRadius;
             }
 
             tslnudCornerRadius.Content.Value = cornerRadius;
@@ -894,19 +1044,21 @@ namespace ShareX.ScreenCaptureLib
             if (tsbHighlightColor.Image != null) tsbHighlightColor.Image.Dispose();
             tsbHighlightColor.Image = ImageHelpers.CreateColorPickerIcon(AnnotationOptions.HighlightColor, new Rectangle(0, 0, 16, 16));
 
+            tsmiShadow.Checked = AnnotationOptions.Shadow;
+
             switch (shapeType)
             {
                 default:
                     tsddbShapeOptions.Visible = false;
                     break;
-                case ShapeType.RegionRoundedRectangle:
+                case ShapeType.RegionRectangle:
                 case ShapeType.DrawingRectangle:
-                case ShapeType.DrawingRoundedRectangle:
                 case ShapeType.DrawingEllipse:
                 case ShapeType.DrawingFreehand:
                 case ShapeType.DrawingLine:
                 case ShapeType.DrawingArrow:
-                case ShapeType.DrawingText:
+                case ShapeType.DrawingTextOutline:
+                case ShapeType.DrawingTextBackground:
                 case ShapeType.DrawingSpeechBalloon:
                 case ShapeType.DrawingStep:
                 case ShapeType.EffectBlur:
@@ -915,25 +1067,28 @@ namespace ShareX.ScreenCaptureLib
                     break;
             }
 
-            tsbUndoObject.Enabled = tsbDeleteAll.Enabled = Shapes.Count > 0;
+            tsmiUndo.Enabled = tsmiDeleteAll.Enabled = Shapes.Count > 0;
+            tsmiDelete.Enabled = tsmiMoveTop.Enabled = tsmiMoveUp.Enabled = tsmiMoveDown.Enabled = tsmiMoveBottom.Enabled = CurrentShape != null;
 
             switch (shapeType)
             {
                 default:
                     tsbBorderColor.Visible = false;
                     tslnudBorderSize.Visible = false;
+                    tsmiShadow.Visible = false;
                     break;
                 case ShapeType.DrawingRectangle:
-                case ShapeType.DrawingRoundedRectangle:
                 case ShapeType.DrawingEllipse:
                 case ShapeType.DrawingFreehand:
                 case ShapeType.DrawingLine:
                 case ShapeType.DrawingArrow:
-                case ShapeType.DrawingText:
+                case ShapeType.DrawingTextOutline:
+                case ShapeType.DrawingTextBackground:
                 case ShapeType.DrawingSpeechBalloon:
                 case ShapeType.DrawingStep:
                     tsbBorderColor.Visible = true;
                     tslnudBorderSize.Visible = true;
+                    tsmiShadow.Visible = true;
                     break;
             }
 
@@ -943,9 +1098,8 @@ namespace ShareX.ScreenCaptureLib
                     tsbFillColor.Visible = false;
                     break;
                 case ShapeType.DrawingRectangle:
-                case ShapeType.DrawingRoundedRectangle:
                 case ShapeType.DrawingEllipse:
-                case ShapeType.DrawingText:
+                case ShapeType.DrawingTextBackground:
                 case ShapeType.DrawingSpeechBalloon:
                 case ShapeType.DrawingStep:
                     tsbFillColor.Visible = true;
@@ -957,9 +1111,9 @@ namespace ShareX.ScreenCaptureLib
                 default:
                     tslnudCornerRadius.Visible = false;
                     break;
-                case ShapeType.RegionRoundedRectangle:
-                case ShapeType.DrawingRoundedRectangle:
-                case ShapeType.DrawingText:
+                case ShapeType.RegionRectangle:
+                case ShapeType.DrawingRectangle:
+                case ShapeType.DrawingTextBackground:
                     tslnudCornerRadius.Visible = true;
                     break;
             }

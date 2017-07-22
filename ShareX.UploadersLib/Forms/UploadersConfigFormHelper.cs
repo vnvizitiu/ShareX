@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -63,7 +63,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -91,7 +91,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -120,7 +120,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -139,7 +139,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -179,7 +179,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -199,7 +199,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -221,7 +221,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -262,7 +262,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -297,7 +297,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -339,7 +339,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -367,7 +367,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -395,7 +395,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -424,7 +424,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -453,7 +453,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -468,21 +468,8 @@ namespace ShareX.UploadersLib
 
                     if (result)
                     {
-                        Config.DropboxAccountInfo = dropbox.GetCurrentAccountAPIv1();
-                        UpdateDropboxStatus();
-
                         oauth2Dropbox.Status = OAuthLoginStatus.LoginSuccessful;
-
-                        if (Config.DropboxAccountInfo != null)
-                        {
-                            MessageBox.Show(Resources.UploadersConfigForm_Login_successful, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        }
-                        else
-                        {
-                            MessageBox.Show(Resources.UploadersConfigForm_DropboxAuthComplete_Login_successful_but_getting_account_info_failed_, "ShareX",
-                                MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-
+                        MessageBox.Show(Resources.UploadersConfigForm_Login_successful, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         return;
                     }
                     else
@@ -491,34 +478,11 @@ namespace ShareX.UploadersLib
                         MessageBox.Show(Resources.UploadersConfigForm_Login_failed, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
-
-                Config.DropboxAccountInfo = null;
-                UpdateDropboxStatus();
             }
             catch (Exception ex)
             {
                 DebugHelper.WriteException(ex);
-                MessageBox.Show(ex.ToString(), "ShareX - " + Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void UpdateDropboxStatus()
-        {
-            if (OAuth2Info.CheckOAuth(Config.DropboxOAuth2Info) && Config.DropboxAccountInfo != null)
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.AppendLine(Resources.UploadersConfigForm_UpdateDropboxStatus_Email_ + " " + Config.DropboxAccountInfo.Email);
-                sb.AppendLine(Resources.UploadersConfigForm_UpdateDropboxStatus_Name_ + " " + Config.DropboxAccountInfo.Display_name);
-                sb.AppendLine(Resources.UploadersConfigForm_UpdateDropboxStatus_User_ID_ + " " + Config.DropboxAccountInfo.Uid);
-                string uploadPath = NameParser.Parse(NameParserType.URL, Dropbox.VerifyPath(Config.DropboxUploadPath));
-                sb.AppendLine(Resources.UploadersConfigForm_UpdateDropboxStatus_Upload_path_ + " " + uploadPath);
-                sb.AppendLine(Resources.UploadersConfigForm_UpdateDropboxStatus_Download_path_ + " " +
-                    Dropbox.GetPublicURL(Config.DropboxAccountInfo.Uid.ToString(), URLHelpers.CombineURL(uploadPath, "Example.png")));
-                lblDropboxStatus.Text = sb.ToString();
-            }
-            else
-            {
-                lblDropboxStatus.Text = "";
+                ex.ShowError();
             }
         }
 
@@ -528,7 +492,7 @@ namespace ShareX.UploadersLib
 
         private void UpdateAmazonS3Status()
         {
-            lblAmazonS3PathPreview.Text = new AmazonS3(Config.AmazonS3Settings).GetURL("Example.png");
+            lblAmazonS3PathPreview.Text = new AmazonS3(Config.AmazonS3Settings).GetPreviewURL();
         }
 
         #endregion Amazon S3
@@ -556,7 +520,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -584,7 +548,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -612,7 +576,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -640,7 +604,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -669,7 +633,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -697,7 +661,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -725,7 +689,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -788,7 +752,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), "ShareX - " + Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -817,7 +781,7 @@ namespace ShareX.UploadersLib
             catch (Exception ex)
             {
                 DebugHelper.WriteException(ex);
-                MessageBox.Show(ex.ToString(), "ShareX - " + Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -845,7 +809,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -908,7 +872,7 @@ namespace ShareX.UploadersLib
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(Resources.UploadersConfigForm_Error + ": " + ex.Message, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ex.ShowError();
                 }
                 finally
                 {
@@ -941,7 +905,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
             finally
             {
@@ -981,70 +945,195 @@ namespace ShareX.UploadersLib
 
         #region FTP
 
-        public bool CheckFTPAccounts()
+        private bool FTPCheckAccount(int index)
         {
-            return Config.FTPAccountList.IsValidIndex(Config.FTPSelectedImage);
+            return Config.FTPAccountList.IsValidIndex(index);
         }
 
-        public FTPAccount GetSelectedFTPAccount()
+        private FTPAccount FTPGetSelectedAccount()
         {
-            if (CheckFTPAccounts())
+            int index = cbFTPAccounts.SelectedIndex;
+
+            if (FTPCheckAccount(index))
             {
-                return Config.FTPAccountList[ucFTPAccounts.lbAccounts.SelectedIndex];
+                return Config.FTPAccountList[index];
             }
 
             return null;
         }
 
-        public void AddFTPAccount(FTPAccount account)
+        private void FTPAddAccount(FTPAccount account)
         {
             if (account != null)
             {
                 Config.FTPAccountList.Add(account);
-                ucFTPAccounts.AddItem(account);
-                FTPSetup(Config.FTPAccountList);
+                cbFTPAccounts.Items.Add(account);
+                FTPUpdateControls();
             }
         }
 
-        public void TestFTPAccountAsync(FTPAccount acc)
+        private void FTPUpdateControls()
         {
-            if (acc != null)
+            FTPUpdateControls(Config.FTPAccountList);
+        }
+
+        private void FTPUpdateControls(List<FTPAccount> accounts)
+        {
+            if (accounts != null)
             {
-                ucFTPAccounts.btnTest.Enabled = false;
+                int selected = cbFTPAccounts.SelectedIndex;
+
+                cbFTPAccounts.Items.Clear();
+                cbFTPImage.Items.Clear();
+                cbFTPText.Items.Clear();
+                cbFTPFile.Items.Clear();
+
+                Config.FTPAccountList = new List<FTPAccount>();
+                Config.FTPAccountList.AddRange(accounts);
+
+                if (Config.FTPAccountList.Count > 0)
+                {
+                    foreach (FTPAccount account in Config.FTPAccountList)
+                    {
+                        cbFTPAccounts.Items.Add(account);
+                        cbFTPImage.Items.Add(account);
+                        cbFTPText.Items.Add(account);
+                        cbFTPFile.Items.Add(account);
+                    }
+
+                    cbFTPAccounts.SelectedIndex = selected.Between(0, Config.FTPAccountList.Count - 1);
+                    cbFTPImage.SelectedIndex = Config.FTPSelectedImage.Between(0, Config.FTPAccountList.Count - 1);
+                    cbFTPText.SelectedIndex = Config.FTPSelectedText.Between(0, Config.FTPAccountList.Count - 1);
+                    cbFTPFile.SelectedIndex = Config.FTPSelectedFile.Between(0, Config.FTPAccountList.Count - 1);
+                }
+
+                FTPUpdateEnabledStates();
+            }
+        }
+
+        private void FTPUpdateEnabledStates()
+        {
+            cbFTPImage.Enabled = cbFTPText.Enabled = cbFTPFile.Enabled = cbFTPAccounts.Enabled = cbFTPAccounts.Items.Count > 0;
+            btnFTPRemove.Enabled = btnFTPDuplicate.Enabled = gbFTPAccount.Enabled = cbFTPAccounts.SelectedIndex > -1;
+
+            FTPAccount account = FTPGetSelectedAccount();
+
+            if (account != null)
+            {
+                gbFTPS.Visible = account.Protocol == FTPProtocol.FTPS;
+                gbSFTP.Visible = account.Protocol == FTPProtocol.SFTP;
+                pFTPTransferMode.Enabled = account.Protocol == FTPProtocol.FTP || account.Protocol == FTPProtocol.FTPS;
+            }
+            else
+            {
+                gbFTPS.Visible = gbSFTP.Visible = false;
+            }
+        }
+
+        private void FTPRefreshNames()
+        {
+            cbFTPAccounts.RefreshItems();
+            cbFTPImage.RefreshItems();
+            cbFTPText.RefreshItems();
+            cbFTPFile.RefreshItems();
+        }
+
+        private void FTPLoadSelectedAccount()
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+
+            if (account != null)
+            {
+                FTPLoadAccount(account);
+            }
+        }
+
+        private void FTPLoadAccount(FTPAccount account)
+        {
+            txtFTPName.Text = account.Name;
+
+            switch (account.Protocol)
+            {
+                case FTPProtocol.FTP:
+                    rbFTPProtocolFTP.Checked = true;
+                    break;
+                case FTPProtocol.FTPS:
+                    rbFTPProtocolFTPS.Checked = true;
+                    break;
+                case FTPProtocol.SFTP:
+                    rbFTPProtocolSFTP.Checked = true;
+                    break;
+            }
+
+            txtFTPHost.Text = account.Host;
+            nudFTPPort.Value = account.Port;
+            txtFTPUsername.Text = account.Username;
+            txtFTPPassword.Text = account.Password;
+
+            if (account.IsActive)
+            {
+                rbFTPTransferModeActive.Checked = true;
+            }
+            else
+            {
+                rbFTPTransferModePassive.Checked = true;
+            }
+
+            txtFTPRemoteDirectory.Text = account.SubFolderPath;
+            cbFTPURLPathProtocol.SelectedIndex = (int)account.BrowserProtocol;
+            txtFTPURLPath.Text = account.HttpHomePath;
+            cbFTPAppendRemoteDirectory.Checked = account.HttpHomePathAutoAddSubFolderPath;
+            cbFTPRemoveFileExtension.Checked = account.HttpHomePathNoExtension;
+            lblFTPURLPreviewValue.Text = account.PreviewHttpPath;
+
+            cbFTPSEncryption.SelectedIndex = (int)account.FTPSEncryption;
+            txtFTPSCertificateLocation.Text = account.FTPSCertificateLocation;
+
+            txtSFTPKeyLocation.Text = account.Keypath;
+            txtSFTPKeyPassphrase.Text = account.Passphrase;
+
+            FTPUpdateEnabledStates();
+        }
+
+        private void FTPClearFields()
+        {
+            FTPAccount account = new FTPAccount()
+            {
+                Name = "",
+                HttpHomePathAutoAddSubFolderPath = false
+            };
+
+            FTPLoadAccount(account);
+        }
+
+        private void FTPUpdateURLPreview()
+        {
+            FTPAccount account = FTPGetSelectedAccount();
+
+            if (account != null)
+            {
+                lblFTPURLPreviewValue.Text = account.PreviewHttpPath;
+            }
+        }
+
+        private void FTPTestAccountAsync(FTPAccount account)
+        {
+            if (account != null)
+            {
+                btnFTPTest.Enabled = false;
 
                 TaskEx.Run(() =>
                 {
-                    TestFTPAccount(acc);
+                    FTPTestAccount(account);
                 },
                 () =>
                 {
-                    ucFTPAccounts.btnTest.Enabled = true;
+                    btnFTPTest.Enabled = true;
                 });
             }
         }
 
-        private void FTPOpenClient()
-        {
-            FTPAccount account = GetSelectedFTPAccount();
-
-            if (account != null)
-            {
-                if (account.Protocol == FTPProtocol.FTP || account.Protocol == FTPProtocol.FTPS)
-                {
-                    new FTPClientForm(account).Show();
-                }
-                else
-                {
-                    MessageBox.Show(Resources.UploadersConfigForm_FTPOpenClient_FTP_client_only_supports_FTP_or_FTPS_, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-
-                return;
-            }
-
-            MessageBox.Show(Resources.UploadersConfigForm_FTPOpenClient_Unable_to_find_valid_FTP_account_, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        public static void TestFTPAccount(FTPAccount account)
+        private void FTPTestAccount(FTPAccount account)
         {
             string msg = "";
             string remotePath = account.GetSubFolderPath();
@@ -1111,6 +1200,18 @@ namespace ShareX.UploadersLib
             MessageBox.Show(msg, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
+        private void FTPOpenClient(FTPAccount account)
+        {
+            if (account.Protocol == FTPProtocol.FTP || account.Protocol == FTPProtocol.FTPS)
+            {
+                new FTPClientForm(account).Show();
+            }
+            else
+            {
+                MessageBox.Show(Resources.UploadersConfigForm_FTPOpenClient_FTP_client_only_supports_FTP_or_FTPS_, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
         #endregion FTP
 
         #region SendSpace
@@ -1148,7 +1249,7 @@ namespace ShareX.UploadersLib
             {
                 Config.Ge_ttLogin = null;
                 lblGe_ttStatus.Text = Resources.UploadersConfigForm_Login_failed;
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -1177,7 +1278,7 @@ namespace ShareX.UploadersLib
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ex.ShowError();
                 }
             }
         }
@@ -1292,7 +1393,7 @@ namespace ShareX.UploadersLib
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ex.ShowError();
                 }
             }
         }
@@ -1324,7 +1425,7 @@ namespace ShareX.UploadersLib
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    ex.ShowError();
                 }
             }
         }
@@ -1371,7 +1472,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -1397,7 +1498,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -1423,7 +1524,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -1452,7 +1553,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -1478,13 +1579,100 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
         #endregion bit.ly
 
         #region Custom uploader
+
+        private void LoadCustomUploaderTab(bool selectLastItem = false)
+        {
+            lbCustomUploaderList.Items.Clear();
+
+            if (Config.CustomUploadersList == null)
+            {
+                Config.CustomUploadersList = new List<CustomUploaderItem>();
+            }
+            else
+            {
+                foreach (CustomUploaderItem customUploader in Config.CustomUploadersList)
+                {
+                    lbCustomUploaderList.Items.Add(customUploader.Name);
+                }
+
+                PrepareCustomUploaderList();
+            }
+
+#if DEBUG
+            btnCustomUploadersExportAll.Visible = true;
+#endif
+
+            CustomUploaderClearFields();
+
+            if (selectLastItem && lbCustomUploaderList.Items.Count > 0)
+            {
+                lbCustomUploaderList.SelectedIndex = lbCustomUploaderList.Items.Count - 1;
+            }
+        }
+
+        public static void UpdateCustomUploaderTab()
+        {
+            if (IsInstanceActive)
+            {
+                UploadersConfigForm form = GetFormInstance(null);
+                form.LoadCustomUploaderTab(true);
+            }
+        }
+
+        private void AddCustomUploaderDestinationTypes()
+        {
+            string[] enums = Helpers.GetLocalizedEnumDescriptions<CustomUploaderDestinationType>().Skip(1).Select(x => x.Replace("&", "&&")).ToArray();
+
+            for (int i = 0; i < enums.Length; i++)
+            {
+                ToolStripMenuItem tsmi = new ToolStripMenuItem(enums[i]);
+
+                int index = i;
+
+                tsmi.Click += (sender, e) =>
+                {
+                    ToolStripMenuItem tsmi2 = (ToolStripMenuItem)cmsCustomUploaderDestinationType.Items[index];
+                    tsmi2.Checked = !tsmi2.Checked;
+                };
+
+                cmsCustomUploaderDestinationType.Items.Add(tsmi);
+            }
+
+            cmsCustomUploaderDestinationType.Closing += (sender, e) => e.Cancel = e.CloseReason == ToolStripDropDownCloseReason.ItemClicked;
+        }
+
+        private void SetCustomUploaderDestinationType(CustomUploaderDestinationType destinationType)
+        {
+            for (int i = 0; i < cmsCustomUploaderDestinationType.Items.Count; i++)
+            {
+                ToolStripMenuItem tsmi = (ToolStripMenuItem)cmsCustomUploaderDestinationType.Items[i];
+                tsmi.Checked = destinationType.HasFlag(1 << i);
+            }
+        }
+
+        private CustomUploaderDestinationType GetCustomUploaderDestinationType()
+        {
+            CustomUploaderDestinationType destinationType = CustomUploaderDestinationType.None;
+
+            for (int i = 0; i < cmsCustomUploaderDestinationType.Items.Count; i++)
+            {
+                ToolStripMenuItem tsmi = (ToolStripMenuItem)cmsCustomUploaderDestinationType.Items[i];
+
+                if (tsmi.Checked)
+                {
+                    destinationType |= (CustomUploaderDestinationType)(1 << i);
+                }
+            }
+
+            return destinationType;
+        }
 
         private void UpdateCustomUploader()
         {
@@ -1560,7 +1748,7 @@ namespace ShareX.UploadersLib
                         foreach (CustomUploaderItem item in Config.CustomUploadersList)
                         {
                             string json = eiCustomUploaders.Serialize(item);
-                            string filepath = Path.Combine(fsd.FileName, item.Name + ".json");
+                            string filepath = Path.Combine(fsd.FileName, item.Name + ".sxcu");
                             File.WriteAllText(filepath, json, Encoding.UTF8);
                         }
                     }
@@ -1622,6 +1810,7 @@ namespace ShareX.UploadersLib
         private void LoadCustomUploader(CustomUploaderItem customUploader)
         {
             txtCustomUploaderName.Text = customUploader.Name ?? "";
+            SetCustomUploaderDestinationType(customUploader.DestinationType);
 
             cbCustomUploaderRequestType.SelectedIndex = (int)customUploader.RequestType;
             txtCustomUploaderRequestURL.Text = customUploader.RequestURL ?? "";
@@ -1671,6 +1860,8 @@ namespace ShareX.UploadersLib
         private CustomUploaderItem GetCustomUploaderFromFields()
         {
             CustomUploaderItem item = new CustomUploaderItem(txtCustomUploaderName.Text);
+
+            item.DestinationType = GetCustomUploaderDestinationType();
 
             item.RequestType = (CustomUploaderRequestType)cbCustomUploaderRequestType.SelectedIndex;
 
@@ -1843,7 +2034,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -1870,7 +2061,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -1893,7 +2084,7 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
@@ -1920,10 +2111,92 @@ namespace ShareX.UploadersLib
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ex.ShowError();
             }
         }
 
         #endregion Gist
+
+        #region Gfycat
+
+        private void GfycatAuthOpen()
+        {
+            try
+            {
+                OAuth2Info oauth = new OAuth2Info(APIKeys.GfycatClientID, APIKeys.GfycatClientSecret);
+
+                string url = new GfycatUploader(oauth).GetAuthorizationURL();
+
+                if (!string.IsNullOrEmpty(url))
+                {
+                    Config.GfycatOAuth2Info = oauth;
+                    URLHelpers.OpenURL(url);
+                    DebugHelper.WriteLine("GfycatAuthOpen - Authorization URL is opened: " + url);
+                }
+                else
+                {
+                    DebugHelper.WriteLine("GfycatAuthOpen - Authorization URL is empty.");
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ShowError();
+            }
+        }
+
+        private void GfycatAuthComplete(string code)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(code) && Config.GfycatOAuth2Info != null)
+                {
+                    bool result = new GfycatUploader(Config.GfycatOAuth2Info).GetAccessToken(code);
+
+                    if (result)
+                    {
+                        oauth2Gfycat.Status = OAuthLoginStatus.LoginSuccessful;
+                        MessageBox.Show(Resources.UploadersConfigForm_Login_successful, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        oauth2Gfycat.Status = OAuthLoginStatus.LoginFailed;
+                        MessageBox.Show(Resources.UploadersConfigForm_Login_failed, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ShowError();
+            }
+        }
+
+        private void GfycatAuthRefresh()
+        {
+            try
+            {
+                if (OAuth2Info.CheckOAuth(Config.GfycatOAuth2Info))
+                {
+                    bool result = new GfycatUploader(Config.GfycatOAuth2Info).RefreshAccessToken();
+
+                    if (result)
+                    {
+                        oauth2Gfycat.Status = OAuthLoginStatus.LoginSuccessful;
+                        MessageBox.Show(Resources.UploadersConfigForm_Login_successful, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        oauth2Gfycat.Status = OAuthLoginStatus.LoginFailed;
+                        MessageBox.Show(Resources.UploadersConfigForm_Login_failed, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        atcGfycatAccountType.SelectedAccountType = AccountType.Anonymous;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.ShowError();
+            }
+        }
+
+        #endregion Gfycat
     }
 }

@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -30,6 +30,8 @@ namespace ShareX.ScreenCaptureLib
 {
     internal class ResizeNode : DrawableObject
     {
+        public const int DefaultSize = 13;
+
         private Point position;
 
         public Point Position
@@ -52,7 +54,7 @@ namespace ShareX.ScreenCaptureLib
 
         public ResizeNode(int x = 0, int y = 0)
         {
-            Size = 13;
+            Size = DefaultSize;
             Shape = NodeShape.Square;
             Position = new Point(x, y);
         }

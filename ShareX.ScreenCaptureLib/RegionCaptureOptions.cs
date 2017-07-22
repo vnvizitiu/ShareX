@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -63,6 +63,7 @@ namespace ShareX.ScreenCaptureLib
         public int MagnifierPixelCount = 15; // Must be odd number like 11, 13, 15 etc.
         public int MagnifierPixelSize = 10;
         public bool ShowCrosshair = false;
+        public bool EnableAnimations = true;
         public bool IsFixedSize = false;
         public Size FixedSize = new Size(250, 250);
         public bool ShowFPS = false;

@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -31,7 +31,7 @@ namespace ShareX.ScreenCaptureLib
 {
     public class TextDrawingShape : RectangleDrawingShape
     {
-        public override ShapeType ShapeType { get; } = ShapeType.DrawingText;
+        public override ShapeType ShapeType { get; } = ShapeType.DrawingTextBackground;
 
         public string Text { get; set; }
         public TextDrawingOptions TextOptions { get; set; }
@@ -42,7 +42,8 @@ namespace ShareX.ScreenCaptureLib
             BorderColor = AnnotationOptions.TextBorderColor;
             BorderSize = AnnotationOptions.TextBorderSize;
             FillColor = AnnotationOptions.TextFillColor;
-            CornerRadius = AnnotationOptions.TextCornerRadius;
+            CornerRadius = AnnotationOptions.DrawingCornerRadius;
+            Shadow = AnnotationOptions.Shadow;
         }
 
         public override void OnConfigSave()
@@ -51,26 +52,41 @@ namespace ShareX.ScreenCaptureLib
             AnnotationOptions.TextBorderColor = BorderColor;
             AnnotationOptions.TextBorderSize = BorderSize;
             AnnotationOptions.TextFillColor = FillColor;
-            AnnotationOptions.TextCornerRadius = (int)CornerRadius;
+            AnnotationOptions.DrawingCornerRadius = CornerRadius;
+            AnnotationOptions.Shadow = Shadow;
         }
 
         public override void OnDraw(Graphics g)
         {
-            base.OnDraw(g);
-
+            DrawRectangle(g);
             DrawText(g);
         }
 
         protected void DrawText(Graphics g)
         {
-            if (!string.IsNullOrEmpty(Text) && Rectangle.Width > 10 && Rectangle.Height > 10)
+            if (Shadow)
             {
-                using (Font font = new Font(TextOptions.Font, TextOptions.Size, TextOptions.Style))
-                using (Brush textBrush = new SolidBrush(TextOptions.Color))
-                using (StringFormat sf = new StringFormat { Alignment = TextOptions.AlignmentHorizontal, LineAlignment = TextOptions.AlignmentVertical })
+                DrawText(g, Text, ShadowColor, TextOptions, Rectangle.LocationOffset(ShadowOffset));
+            }
+
+            DrawText(g, Text, TextOptions, Rectangle);
+        }
+
+        protected void DrawText(Graphics g, string text, TextDrawingOptions options, Rectangle rect)
+        {
+            DrawText(g, text, options.Color, options, rect);
+        }
+
+        protected void DrawText(Graphics g, string text, Color textColor, TextDrawingOptions options, Rectangle rect)
+        {
+            if (!string.IsNullOrEmpty(text) && rect.Width > 10 && rect.Height > 10)
+            {
+                using (Font font = new Font(options.Font, options.Size, options.Style))
+                using (Brush textBrush = new SolidBrush(textColor))
+                using (StringFormat sf = new StringFormat { Alignment = options.AlignmentHorizontal, LineAlignment = options.AlignmentVertical })
                 {
                     g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-                    g.DrawString(Text, font, textBrush, Rectangle, sf);
+                    g.DrawString(text, font, textBrush, rect, sf);
                     g.TextRenderingHint = TextRenderingHint.SystemDefault;
                 }
             }

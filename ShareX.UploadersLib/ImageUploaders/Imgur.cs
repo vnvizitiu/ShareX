@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -83,6 +83,7 @@ namespace ShareX.UploadersLib.ImageUploaders
                 UploadMethod = config.ImgurAccountType,
                 DirectLink = config.ImgurDirectLink,
                 ThumbnailType = config.ImgurThumbnailType,
+                UseHTTPS = config.ImgurUseHTTPS,
                 UseGIFV = config.ImgurUseGIFV,
                 UploadAlbumID = albumID
             };
@@ -98,6 +99,7 @@ namespace ShareX.UploadersLib.ImageUploaders
         public ImgurThumbnailType ThumbnailType { get; set; }
         public string UploadAlbumID { get; set; }
         public bool DirectLink { get; set; }
+        public bool UseHTTPS { get; set; }
         public bool UseGIFV { get; set; }
 
         public Imgur(OAuth2Info oauth)
@@ -122,7 +124,7 @@ namespace ShareX.UploadersLib.ImageUploaders
             args.Add("grant_type", "pin");
             args.Add("pin", pin);
 
-            string response = SendRequest(HttpMethod.POST, "https://api.imgur.com/oauth2/token", args);
+            string response = SendRequestMultiPart("https://api.imgur.com/oauth2/token", args);
 
             if (!string.IsNullOrEmpty(response))
             {
@@ -149,7 +151,7 @@ namespace ShareX.UploadersLib.ImageUploaders
                 args.Add("client_secret", AuthInfo.Client_Secret);
                 args.Add("grant_type", "refresh_token");
 
-                string response = SendRequest(HttpMethod.POST, "https://api.imgur.com/oauth2/token", args);
+                string response = SendRequestMultiPart("https://api.imgur.com/oauth2/token", args);
 
                 if (!string.IsNullOrEmpty(response))
                 {
@@ -217,6 +219,30 @@ namespace ShareX.UploadersLib.ImageUploaders
             return null;
         }
 
+        public List<ImgurImageData> GetAlbumImages(string albumID)
+        {
+            if (CheckAuthorization())
+            {
+                string response = SendRequest(HttpMethod.GET, $"https://api.imgur.com/3/album/{albumID}/images", headers: GetAuthHeaders());
+
+                ImgurResponse imgurResponse = JsonConvert.DeserializeObject<ImgurResponse>(response);
+
+                if (imgurResponse != null)
+                {
+                    if (imgurResponse.success && imgurResponse.status == 200)
+                    {
+                        return ((JArray)imgurResponse.data).ToObject<List<ImgurImageData>>();
+                    }
+                    else
+                    {
+                        HandleErrors(imgurResponse);
+                    }
+                }
+            }
+
+            return null;
+        }
+
         public override UploadResult Upload(Stream stream, string fileName)
         {
             return InternalUpload(stream, fileName, true);
@@ -247,8 +273,8 @@ namespace ShareX.UploadersLib.ImageUploaders
                 headers.Add("Authorization", "Client-ID " + AuthInfo.Client_ID);
             }
 
-            WebExceptionReturnResponse = true;
-            UploadResult result = UploadData(stream, "https://api.imgur.com/3/image", fileName, "image", args, headers);
+            ReturnResponseOnError = true;
+            UploadResult result = SendRequestFile("https://api.imgur.com/3/image", stream, fileName, "image", args, headers);
 
             if (!string.IsNullOrEmpty(result.Response))
             {
@@ -275,7 +301,7 @@ namespace ShareX.UploadersLib.ImageUploaders
                             }
                             else
                             {
-                                result.URL = "http://imgur.com/" + imageData.id;
+                                result.URL = $"http://imgur.com/{imageData.id}";
                             }
 
                             string thumbnail = "";
@@ -302,8 +328,13 @@ namespace ShareX.UploadersLib.ImageUploaders
                                     break;
                             }
 
-                            result.ThumbnailURL = string.Format("http://i.imgur.com/{0}{1}.jpg", imageData.id, thumbnail); // Thumbnails always jpg
-                            result.DeletionURL = "http://imgur.com/delete/" + imageData.deletehash;
+                            result.ThumbnailURL = $"http://i.imgur.com/{imageData.id}{thumbnail}.jpg"; // Imgur thumbnails always jpg
+                            result.DeletionURL = $"http://imgur.com/delete/{imageData.deletehash}";
+
+                            if (UseHTTPS)
+                            {
+                                result.ForceHTTPS();
+                            }
                         }
                     }
                     else
@@ -369,7 +400,7 @@ namespace ShareX.UploadersLib.ImageUploaders
         public int height { get; set; }
         public int size { get; set; }
         public int views { get; set; }
-        public int bandwidth { get; set; }
+        public long bandwidth { get; set; }
         public string deletehash { get; set; }
         public string name { get; set; }
         public string section { get; set; }

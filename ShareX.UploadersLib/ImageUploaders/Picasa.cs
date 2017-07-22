@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -86,7 +86,7 @@ namespace ShareX.UploadersLib.ImageUploaders
             args.Add("redirect_uri", "urn:ietf:wg:oauth:2.0:oob");
             args.Add("grant_type", "authorization_code");
 
-            string response = SendRequest(HttpMethod.POST, "https://accounts.google.com/o/oauth2/token", args);
+            string response = SendRequestMultiPart("https://accounts.google.com/o/oauth2/token", args);
 
             if (!string.IsNullOrEmpty(response))
             {
@@ -113,7 +113,7 @@ namespace ShareX.UploadersLib.ImageUploaders
                 args.Add("client_secret", AuthInfo.Client_Secret);
                 args.Add("grant_type", "refresh_token");
 
-                string response = SendRequest(HttpMethod.POST, "https://accounts.google.com/o/oauth2/token", args);
+                string response = SendRequestMultiPart("https://accounts.google.com/o/oauth2/token", args);
 
                 if (!string.IsNullOrEmpty(response))
                 {
@@ -137,6 +137,7 @@ namespace ShareX.UploadersLib.ImageUploaders
         {
             NameValueCollection headers = new NameValueCollection();
             headers.Add("Authorization", "Bearer " + AuthInfo.Token.access_token);
+            headers.Add("GData-Version", "3");
             return headers;
         }
 
@@ -177,7 +178,7 @@ namespace ShareX.UploadersLib.ImageUploaders
                     {
                         PicasaAlbumInfo album = new PicasaAlbumInfo();
                         album.ID = entry.GetElementValue(GPhotoNS + "id");
-                        album.Name = entry.GetElementValue(GPhotoNS + "name");
+                        album.Name = entry.GetElementValue(AtomNS + "title");
                         album.Summary = entry.GetElementValue(AtomNS + "summary");
                         albumList.Add(album);
                     }
@@ -204,7 +205,7 @@ namespace ShareX.UploadersLib.ImageUploaders
             NameValueCollection headers = GetAuthHeaders();
             headers.Add("Slug", URLHelpers.URLEncode(fileName));
 
-            ur.Response = SendRequestStream(url, stream, contentType, headers);
+            ur.Response = SendRequest(HttpMethod.POST, url, stream, contentType, null, headers);
 
             if (ur.Response != null)
             {

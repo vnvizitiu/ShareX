@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -27,6 +27,8 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace ShareX.Setup
 {
@@ -36,10 +38,10 @@ namespace ShareX.Setup
         {
             Console.WriteLine("Downloading: " + url);
 
-            using (WebClient webClient = new WebClient())
+            using (WebClient wc = new WebClient())
             {
                 string filename = Path.GetFileName(url);
-                webClient.DownloadFile(url, filename);
+                wc.DownloadFile(url, filename);
                 return filename;
             }
         }
@@ -49,7 +51,7 @@ namespace ShareX.Setup
             CopyFiles(new string[] { path }, toFolder);
         }
 
-        public static void CopyFiles(string[] files, string toFolder)
+        public static void CopyFiles(IEnumerable<string> files, string toFolder)
         {
             if (!Directory.Exists(toFolder))
             {
@@ -64,9 +66,55 @@ namespace ShareX.Setup
             }
         }
 
-        public static void CopyFiles(string directory, string searchPattern, string toFolder)
+        public static void CopyFiles(string directory, string searchPattern, string toFolder, string[] ignoreFiles = null)
         {
-            CopyFiles(Directory.GetFiles(directory, searchPattern), toFolder);
+            string[] files = Directory.GetFiles(directory, searchPattern);
+
+            if (ignoreFiles != null)
+            {
+                List<string> newFiles = new List<string>();
+
+                foreach (string file in files)
+                {
+                    string filename = Path.GetFileName(file);
+
+                    if (ignoreFiles.All(x => !filename.Equals(x, StringComparison.InvariantCultureIgnoreCase)))
+                    {
+                        newFiles.Add(file);
+                    }
+                }
+
+                files = newFiles.ToArray();
+            }
+
+            CopyFiles(files, toFolder);
+        }
+
+        public static void CopyAll(string sourceDirectory, string targetDirectory)
+        {
+            DirectoryInfo diSource = new DirectoryInfo(sourceDirectory);
+            DirectoryInfo diTarget = new DirectoryInfo(targetDirectory);
+
+            CopyAll(diSource, diTarget);
+        }
+
+        public static void CopyAll(DirectoryInfo source, DirectoryInfo target)
+        {
+            if (!Directory.Exists(target.FullName))
+            {
+                Directory.CreateDirectory(target.FullName);
+            }
+
+            foreach (FileInfo fi in source.GetFiles())
+            {
+                fi.CopyTo(Path.Combine(target.FullName, fi.Name), true);
+            }
+
+            foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
+            {
+                DirectoryInfo nextTargetSubDir = target.CreateSubdirectory(diSourceSubDir.Name);
+                CopyAll(diSourceSubDir, nextTargetSubDir);
+            }
         }
 
         public static void Zip(string source, string target)
@@ -109,6 +157,11 @@ namespace ShareX.Setup
             }
 
             return false;
+        }
+
+        public static void CreateEmptyFile(string path)
+        {
+            File.Create(path).Dispose();
         }
     }
 }

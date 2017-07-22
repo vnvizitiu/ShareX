@@ -149,10 +149,10 @@
     <value>File path without extension + "Output file name extension"</value>
   </data>
   <data name="ReplCodeMenuEntry_t_Title_of_active_window" xml:space="preserve">
-    <value>Title of active window</value>
+    <value>Title of window</value>
   </data>
   <data name="ReplCodeMenuEntry_pn_Process_name_of_active_window" xml:space="preserve">
-    <value>Process name of active window</value>
+    <value>Process name of window</value>
   </data>
   <data name="ReplCodeMenuEntry_y_Current_year" xml:space="preserve">
     <value>Current year</value>
@@ -246,9 +246,6 @@
   </data>
   <data name="ClipboardContentViewer_ClipboardContentViewer_Load_Clipboard_is_empty_or_contains_unknown_data_" xml:space="preserve">
     <value>Clipboard is empty or contains unknown data.</value>
-  </data>
-  <data name="RegistryHelpers_ShellExtDesc_Upload_with__0_" xml:space="preserve">
-    <value>Upload with {0}</value>
   </data>
   <data name="PrintTextForm_LoadSettings_Name___0___Size___1_" xml:space="preserve">
     <value>Name: {0}, Size: {1}</value>
@@ -454,7 +451,7 @@ File size: {2:n0} / {3:n0} KB</value>
     <value>Screen color picker</value>
   </data>
   <data name="HotkeyType_ScreenRecorder" xml:space="preserve">
-    <value>Start/Stop screen recording</value>
+    <value>Start/Stop screen recording using custom region</value>
   </data>
   <data name="HotkeyType_StopUploads" xml:space="preserve">
     <value>Stop all active uploads</value>
@@ -505,7 +502,7 @@ File size: {2:n0} / {3:n0} KB</value>
     <value>Add image effects / watermark</value>
   </data>
   <data name="AfterCaptureTasks_AnnotateImage" xml:space="preserve">
-    <value>Open in image editor</value>
+    <value>Annotate image</value>
   </data>
   <data name="AfterCaptureTasks_CopyFilePathToClipboard" xml:space="preserve">
     <value>Copy file path to clipboard</value>
@@ -583,7 +580,7 @@ File size: {2:n0} / {3:n0} KB</value>
     <value>Start auto capture using last region</value>
   </data>
   <data name="HotkeyType_StartScreenRecorder" xml:space="preserve">
-    <value>Start screen recording using last region</value>
+    <value>Start/Stop screen recording using last region</value>
   </data>
   <data name="UpdateMessageBox_UpdateMessageBox_" xml:space="preserve">
     <value>A newer version of {0} is available.
@@ -599,19 +596,16 @@ Would you like to download and install it?</value>
     <value>Color picker</value>
   </data>
   <data name="HotkeyType_ScreenRecorderGIF" xml:space="preserve">
-    <value>Start/Stop screen recording (GIF)</value>
+    <value>Start/Stop screen recording (GIF) using custom region</value>
   </data>
   <data name="HotkeyType_StartScreenRecorderGIF" xml:space="preserve">
-    <value>Start screen recording (GIF) using last region</value>
-  </data>
-  <data name="HotkeyType_Automate" xml:space="preserve">
-    <value>Open/Stop Automate tool</value>
+    <value>Start/Stop screen recording (GIF) using last region</value>
   </data>
   <data name="HotkeyType_RectangleTransparent" xml:space="preserve">
     <value>Capture region (Transparent)</value>
   </data>
   <data name="HotkeyType_CustomRegion" xml:space="preserve">
-    <value>Capture custom region</value>
+    <value>Capture pre configured region</value>
   </data>
   <data name="ScreenRecordGIFEncoding_FFmpeg" xml:space="preserve">
     <value>FFmpeg (Good quality)</value>
@@ -630,9 +624,6 @@ Would you like to download and install it?</value>
   </data>
   <data name="HotkeyType_AutoCapture_Category" xml:space="preserve">
     <value>Screen capture</value>
-  </data>
-  <data name="HotkeyType_Automate_Category" xml:space="preserve">
-    <value>Tools</value>
   </data>
   <data name="HotkeyType_ClipboardUploadWithContentViewer_Category" xml:space="preserve">
     <value>Upload</value>
@@ -722,13 +713,13 @@ Would you like to download and install it?</value>
     <value>Screen capture</value>
   </data>
   <data name="HotkeyType_ScreenRecorderActiveWindow" xml:space="preserve">
-    <value>Start screen recording using active window region</value>
+    <value>Start/Stop screen recording using active window region</value>
   </data>
   <data name="HotkeyType_ScreenRecorderActiveWindow_Category" xml:space="preserve">
     <value>Screen record</value>
   </data>
   <data name="HotkeyType_ScreenRecorderGIFActiveWindow" xml:space="preserve">
-    <value>Start screen recording (GIF) using active window region</value>
+    <value>Start/Stop screen recording (GIF) using active window region</value>
   </data>
   <data name="HotkeyType_ScreenRecorderGIFActiveWindow_Category" xml:space="preserve">
     <value>Screen record</value>
@@ -864,13 +855,13 @@ Would you like to download it?</value>
     <value>Other</value>
   </data>
   <data name="HotkeyType_ScreenRecorderCustomRegion" xml:space="preserve">
-    <value>Start screen recording using custom region</value>
+    <value>Start/Stop screen recording using pre configured region</value>
   </data>
   <data name="HotkeyType_ScreenRecorderCustomRegion_Category" xml:space="preserve">
     <value>Screen record</value>
   </data>
   <data name="HotkeyType_ScreenRecorderGIFCustomRegion" xml:space="preserve">
-    <value>Start screen recording (GIF) using custom region</value>
+    <value>Start/Stop screen recording (GIF) using pre configured region</value>
   </data>
   <data name="HotkeyType_ScreenRecorderGIFCustomRegion_Category" xml:space="preserve">
     <value>Screen record</value>
@@ -926,23 +917,14 @@ Would you like to download it?</value>
   <data name="ShapeType_DrawingRectangle" xml:space="preserve">
     <value>Drawing: Rectangle</value>
   </data>
-  <data name="ShapeType_DrawingRoundedRectangle" xml:space="preserve">
-    <value>Drawing: Rounded rectangle</value>
-  </data>
   <data name="ShapeType_DrawingStep" xml:space="preserve">
     <value>Drawing: Step</value>
-  </data>
-  <data name="ShapeType_DrawingText" xml:space="preserve">
-    <value>Drawing: Text</value>
   </data>
   <data name="ShapeType_RegionEllipse" xml:space="preserve">
     <value>Region: Ellipse</value>
   </data>
   <data name="ShapeType_RegionRectangle" xml:space="preserve">
     <value>Region: Rectangle</value>
-  </data>
-  <data name="ShapeType_RegionRoundedRectangle" xml:space="preserve">
-    <value>Region: Rounded rectangle</value>
   </data>
   <data name="ScrollingCaptureScrollMethod_Automatic" xml:space="preserve">
     <value>Automatically try all methods until one works</value>
@@ -981,9 +963,72 @@ Would you like to download it?</value>
     <value>Drawing: Freehand</value>
   </data>
   <data name="ShapeType_DrawingImage" xml:space="preserve">
-    <value>Drawing: Image</value>
+    <value>Drawing: Image (File)</value>
   </data>
   <data name="ShapeType_DrawingSpeechBalloon" xml:space="preserve">
     <value>Drawing: Speech balloon</value>
+  </data>
+  <data name="HotkeyType_ToggleActionsToolbar" xml:space="preserve">
+    <value>Toggle actions toolbar</value>
+  </data>
+  <data name="HotkeyType_ToggleActionsToolbar_Category" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="HotkeyType_ExitShareX" xml:space="preserve">
+    <value>Exit ShareX</value>
+  </data>
+  <data name="HotkeyType_ExitShareX_Category" xml:space="preserve">
+    <value>Other</value>
+  </data>
+  <data name="ShapeType_DrawingTextOutline" xml:space="preserve">
+    <value>Drawing: Text (Outline)</value>
+  </data>
+  <data name="ShapeType_DrawingTextBackground" xml:space="preserve">
+    <value>Drawing: Text (Background)</value>
+  </data>
+  <data name="DownloaderForm_ProxyDetected" xml:space="preserve">
+    <value>Possible proxy detected. Please open the Application Settings from the main menu and choose Proxy to enter your proxy server settings.</value>
+  </data>
+  <data name="DownloaderForm_Download_Canceled" xml:space="preserve">
+    <value>Download canceled.</value>
+  </data>
+  <data name="DownloaderForm_ChangeProgress_Progress___0_" xml:space="preserve">
+    <value>Progress: {0}</value>
+  </data>
+  <data name="ShapeType_DrawingCrop" xml:space="preserve">
+    <value>Crop image</value>
+  </data>
+  <data name="ShapeType_DrawingImageScreen" xml:space="preserve">
+    <value>Drawing: Image (Screen)</value>
+  </data>
+  <data name="URLSharingServices_GoogleImageSearch" xml:space="preserve">
+    <value>Google image search</value>
+  </data>
+  <data name="CustomUploaderDestinationType_URLShortener" xml:space="preserve">
+    <value>URL shortener</value>
+  </data>
+  <data name="CustomUploaderDestinationType_FileUploader" xml:space="preserve">
+    <value>File uploader</value>
+  </data>
+  <data name="CustomUploaderDestinationType_TextUploader" xml:space="preserve">
+    <value>Text uploader</value>
+  </data>
+  <data name="CustomUploaderDestinationType_ImageUploader" xml:space="preserve">
+    <value>Image uploader</value>
+  </data>
+  <data name="PNGBitDepth_Default" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="PNGBitDepth_Automatic" xml:space="preserve">
+    <value>Automatically detect</value>
+  </data>
+  <data name="PNGBitDepth_Bit32" xml:space="preserve">
+    <value>32 bit</value>
+  </data>
+  <data name="PNGBitDepth_Bit24" xml:space="preserve">
+    <value>24 bit</value>
+  </data>
+  <data name="ShapeType_DrawingCursor" xml:space="preserve">
+    <value>Drawing: Cursor</value>
   </data>
 </root>

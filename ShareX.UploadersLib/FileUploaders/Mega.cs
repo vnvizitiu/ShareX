@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -152,7 +152,7 @@ namespace ShareX.UploadersLib.FileUploaders
 
         public string PostRequestJson(Uri url, string jsonData)
         {
-            return SendRequestJSON(url.ToString(), jsonData);
+            return SendRequest(HttpMethod.POST, url.ToString(), jsonData, ContentTypeJSON);
         }
 
         public string PostRequestRaw(Uri url, Stream dataStream)
@@ -160,7 +160,7 @@ namespace ShareX.UploadersLib.FileUploaders
             try
             {
                 AllowReportProgress = true;
-                return SendRequestStream(url.ToString(), dataStream, "application/octet-stream");
+                return SendRequest(HttpMethod.POST, url.ToString(), dataStream, "application/octet-stream");
             }
             finally
             {

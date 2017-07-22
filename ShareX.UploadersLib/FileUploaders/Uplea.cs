@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -76,7 +76,8 @@ namespace ShareX.UploadersLib.FileUploaders
 
         private UpleaNode GetBestNode()
         {
-            UpleaGetBestNodeResponse getBestNodeResponse = JsonConvert.DeserializeObject<UpleaGetBestNodeResponse>(SendRequest(HttpMethod.POST, upleaBaseUrl + "get-best-node"));
+            string response = SendRequest(HttpMethod.POST, upleaBaseUrl + "get-best-node");
+            UpleaGetBestNodeResponse getBestNodeResponse = JsonConvert.DeserializeObject<UpleaGetBestNodeResponse>(response);
             return new UpleaNode(getBestNodeResponse.Result.Name, getBestNodeResponse.Result.Token);
         }
 
@@ -112,7 +113,7 @@ namespace ShareX.UploadersLib.FileUploaders
         {
             Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("json", JsonConvert.SerializeObject(upleaRequest));
-            return SendRequestURLEncoded(upleaBaseUrl + upleaRequest.RequestType, parameters);
+            return SendRequestURLEncoded(HttpMethod.POST, upleaBaseUrl + upleaRequest.RequestType, parameters);
         }
 
         public override UploadResult Upload(Stream stream, string fileName)
@@ -124,7 +125,7 @@ namespace ShareX.UploadersLib.FileUploaders
             args.Add("token", upleaBestNode.Token);
             args.Add("file_id[]", Guid.NewGuid().ToString());
 
-            UploadResult result = UploadData(stream, string.Format("http://{0}/", upleaBestNode.Name), fileName, "files[]", args);
+            UploadResult result = SendRequestFile(string.Format("http://{0}/", upleaBestNode.Name), stream, fileName, "files[]", args);
             UpleaGetUpleaUploadResponse uploadResult = JsonConvert.DeserializeObject<UpleaGetUpleaUploadResponse>(result.Response);
 
             if (uploadResult.Files.Length > 0)

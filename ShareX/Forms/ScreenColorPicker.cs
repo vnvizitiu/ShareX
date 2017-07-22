@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -38,41 +38,26 @@ namespace ShareX
     {
         private Timer colorTimer = new Timer { Interval = 10 };
 
-        public ScreenColorPicker()
+        public ScreenColorPicker(bool checkClipboard = false)
         {
             InitializeComponent();
             btnOK.Visible = false;
             btnCancel.Text = Resources.ScreenColorPicker_ScreenColorPicker_Close;
-            colorPicker.DrawCrosshair = true;
             colorTimer.Tick += colorTimer_Tick;
 
             UpdateControls(false);
 
-            foreach (Control control in Controls)
+            if (checkClipboard)
             {
-                if (control is NumericUpDown || control is TextBox)
+                if (Clipboard.ContainsText())
                 {
-                    control.DoubleClick += CopyToClipboard;
+                    string text = Clipboard.GetText();
+
+                    if (ColorHelpers.ParseColor(text, out Color color))
+                    {
+                        SetCurrentColor(color, false);
+                    }
                 }
-            }
-        }
-
-        private void CopyToClipboard(object sender, EventArgs e)
-        {
-            string text = "";
-
-            if (sender is NumericUpDown)
-            {
-                text = ((NumericUpDown)sender).Value.ToString();
-            }
-            else if (sender is TextBox)
-            {
-                text = ((TextBox)sender).Text;
-            }
-
-            if (!string.IsNullOrEmpty(text))
-            {
-                ClipboardHelpers.CopyText(text);
             }
         }
 

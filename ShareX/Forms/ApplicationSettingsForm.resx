@@ -600,6 +600,84 @@
   <data name="&gt;&gt;tpGeneral.ZOrder" xml:space="preserve">
     <value>0</value>
   </data>
+  <data name="cbFirefoxAddonSupport.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="cbFirefoxAddonSupport.Location" type="System.Drawing.Point, System.Drawing">
+    <value>16, 24</value>
+  </data>
+  <data name="cbFirefoxAddonSupport.Size" type="System.Drawing.Size, System.Drawing">
+    <value>164, 17</value>
+  </data>
+  <data name="cbFirefoxAddonSupport.TabIndex" type="System.Int32, mscorlib">
+    <value>4</value>
+  </data>
+  <data name="cbFirefoxAddonSupport.Text" xml:space="preserve">
+    <value>Enable Firefox addon support</value>
+  </data>
+  <data name="&gt;&gt;cbFirefoxAddonSupport.Name" xml:space="preserve">
+    <value>cbFirefoxAddonSupport</value>
+  </data>
+  <data name="&gt;&gt;cbFirefoxAddonSupport.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;cbFirefoxAddonSupport.Parent" xml:space="preserve">
+    <value>gbFirefox</value>
+  </data>
+  <data name="&gt;&gt;cbFirefoxAddonSupport.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="btnFirefoxOpenAddonPage.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="btnFirefoxOpenAddonPage.Location" type="System.Drawing.Point, System.Drawing">
+    <value>16, 48</value>
+  </data>
+  <data name="btnFirefoxOpenAddonPage.Size" type="System.Drawing.Size, System.Drawing">
+    <value>288, 23</value>
+  </data>
+  <data name="btnFirefoxOpenAddonPage.TabIndex" type="System.Int32, mscorlib">
+    <value>3</value>
+  </data>
+  <data name="btnFirefoxOpenAddonPage.Text" xml:space="preserve">
+    <value>Install ShareX Firefox addon...</value>
+  </data>
+  <data name="&gt;&gt;btnFirefoxOpenAddonPage.Name" xml:space="preserve">
+    <value>btnFirefoxOpenAddonPage</value>
+  </data>
+  <data name="&gt;&gt;btnFirefoxOpenAddonPage.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btnFirefoxOpenAddonPage.Parent" xml:space="preserve">
+    <value>gbFirefox</value>
+  </data>
+  <data name="&gt;&gt;btnFirefoxOpenAddonPage.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="gbFirefox.Location" type="System.Drawing.Point, System.Drawing">
+    <value>8, 216</value>
+  </data>
+  <data name="gbFirefox.Size" type="System.Drawing.Size, System.Drawing">
+    <value>536, 88</value>
+  </data>
+  <data name="gbFirefox.TabIndex" type="System.Int32, mscorlib">
+    <value>3</value>
+  </data>
+  <data name="gbFirefox.Text" xml:space="preserve">
+    <value>Firefox addon</value>
+  </data>
+  <data name="&gt;&gt;gbFirefox.Name" xml:space="preserve">
+    <value>gbFirefox</value>
+  </data>
+  <data name="&gt;&gt;gbFirefox.Type" xml:space="preserve">
+    <value>System.Windows.Forms.GroupBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;gbFirefox.Parent" xml:space="preserve">
+    <value>tpIntegration</value>
+  </data>
+  <data name="&gt;&gt;gbFirefox.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
   <data name="cbSteamShowInApp.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
@@ -628,7 +706,7 @@
     <value>0</value>
   </data>
   <data name="gbSteam.Location" type="System.Drawing.Point, System.Drawing">
-    <value>8, 192</value>
+    <value>8, 312</value>
   </data>
   <data name="gbSteam.Size" type="System.Drawing.Size, System.Drawing">
     <value>536, 56</value>
@@ -638,7 +716,7 @@
   </data>
   <data name="gbSteam.Text" xml:space="preserve">
     <value>Steam</value>
-  </data>
+  <comment>@Invariant</comment></data>
   <data name="&gt;&gt;gbSteam.Name" xml:space="preserve">
     <value>gbSteam</value>
   </data>
@@ -649,43 +727,70 @@
     <value>tpIntegration</value>
   </data>
   <data name="&gt;&gt;gbSteam.ZOrder" xml:space="preserve">
-    <value>0</value>
+    <value>1</value>
   </data>
-  <data name="btnChromeSupport.Location" type="System.Drawing.Point, System.Drawing">
+  <data name="cbChromeExtensionSupport.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="cbChromeExtensionSupport.Location" type="System.Drawing.Point, System.Drawing">
     <value>16, 24</value>
   </data>
-  <data name="btnChromeSupport.Size" type="System.Drawing.Size, System.Drawing">
-    <value>224, 24</value>
+  <data name="cbChromeExtensionSupport.Size" type="System.Drawing.Size, System.Drawing">
+    <value>184, 17</value>
   </data>
-  <data name="btnChromeSupport.TabIndex" type="System.Int32, mscorlib">
-    <value>0</value>
+  <data name="cbChromeExtensionSupport.TabIndex" type="System.Int32, mscorlib">
+    <value>4</value>
   </data>
-  <data name="btnChromeSupport.Text" xml:space="preserve">
-    <value>Chrome extension support...</value>
+  <data name="cbChromeExtensionSupport.Text" xml:space="preserve">
+    <value>Enable Chrome extension support</value>
   </data>
-  <data name="&gt;&gt;btnChromeSupport.Name" xml:space="preserve">
-    <value>btnChromeSupport</value>
+  <data name="&gt;&gt;cbChromeExtensionSupport.Name" xml:space="preserve">
+    <value>cbChromeExtensionSupport</value>
   </data>
-  <data name="&gt;&gt;btnChromeSupport.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="&gt;&gt;cbChromeExtensionSupport.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;btnChromeSupport.Parent" xml:space="preserve">
+  <data name="&gt;&gt;cbChromeExtensionSupport.Parent" xml:space="preserve">
     <value>gbChrome</value>
   </data>
-  <data name="&gt;&gt;btnChromeSupport.ZOrder" xml:space="preserve">
+  <data name="&gt;&gt;cbChromeExtensionSupport.ZOrder" xml:space="preserve">
     <value>0</value>
+  </data>
+  <data name="btnChromeOpenExtensionPage.Location" type="System.Drawing.Point, System.Drawing">
+    <value>16, 48</value>
+  </data>
+  <data name="btnChromeOpenExtensionPage.Size" type="System.Drawing.Size, System.Drawing">
+    <value>288, 23</value>
+  </data>
+  <data name="btnChromeOpenExtensionPage.TabIndex" type="System.Int32, mscorlib">
+    <value>3</value>
+  </data>
+  <data name="btnChromeOpenExtensionPage.Text" xml:space="preserve">
+    <value>Install ShareX Chrome extension...</value>
+  </data>
+  <data name="&gt;&gt;btnChromeOpenExtensionPage.Name" xml:space="preserve">
+    <value>btnChromeOpenExtensionPage</value>
+  </data>
+  <data name="&gt;&gt;btnChromeOpenExtensionPage.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btnChromeOpenExtensionPage.Parent" xml:space="preserve">
+    <value>gbChrome</value>
+  </data>
+  <data name="&gt;&gt;btnChromeOpenExtensionPage.ZOrder" xml:space="preserve">
+    <value>1</value>
   </data>
   <data name="gbChrome.Location" type="System.Drawing.Point, System.Drawing">
     <value>8, 120</value>
   </data>
   <data name="gbChrome.Size" type="System.Drawing.Size, System.Drawing">
-    <value>536, 64</value>
+    <value>536, 88</value>
   </data>
   <data name="gbChrome.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
   </data>
   <data name="gbChrome.Text" xml:space="preserve">
-    <value>Chrome</value>
+    <value>Chrome extension</value>
   </data>
   <data name="&gt;&gt;gbChrome.Name" xml:space="preserve">
     <value>gbChrome</value>
@@ -697,7 +802,37 @@
     <value>tpIntegration</value>
   </data>
   <data name="&gt;&gt;gbChrome.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>2</value>
+  </data>
+  <data name="lblWindowsStoreStartupStatus.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="lblWindowsStoreStartupStatus.Location" type="System.Drawing.Point, System.Drawing">
+    <value>13, 56</value>
+  </data>
+  <data name="lblWindowsStoreStartupStatus.Size" type="System.Drawing.Size, System.Drawing">
+    <value>37, 13</value>
+  </data>
+  <data name="lblWindowsStoreStartupStatus.TabIndex" type="System.Int32, mscorlib">
+    <value>3</value>
+  </data>
+  <data name="lblWindowsStoreStartupStatus.Text" xml:space="preserve">
+    <value>Status</value>
+  <comment>@Invariant</comment></data>
+  <data name="lblWindowsStoreStartupStatus.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="&gt;&gt;lblWindowsStoreStartupStatus.Name" xml:space="preserve">
+    <value>lblWindowsStoreStartupStatus</value>
+  </data>
+  <data name="&gt;&gt;lblWindowsStoreStartupStatus.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lblWindowsStoreStartupStatus.Parent" xml:space="preserve">
+    <value>gbWindows</value>
+  </data>
+  <data name="&gt;&gt;lblWindowsStoreStartupStatus.ZOrder" xml:space="preserve">
+    <value>0</value>
   </data>
   <data name="cbStartWithWindows.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -727,7 +862,7 @@
     <value>gbWindows</value>
   </data>
   <data name="&gt;&gt;cbStartWithWindows.ZOrder" xml:space="preserve">
-    <value>0</value>
+    <value>1</value>
   </data>
   <data name="cbSendToMenu.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -757,7 +892,7 @@
     <value>gbWindows</value>
   </data>
   <data name="&gt;&gt;cbSendToMenu.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>2</value>
   </data>
   <data name="cbShellContextMenu.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -787,7 +922,7 @@
     <value>gbWindows</value>
   </data>
   <data name="&gt;&gt;cbShellContextMenu.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>3</value>
   </data>
   <data name="gbWindows.Location" type="System.Drawing.Point, System.Drawing">
     <value>8, 8</value>
@@ -800,7 +935,7 @@
   </data>
   <data name="gbWindows.Text" xml:space="preserve">
     <value>Windows</value>
-  </data>
+  <comment>@Invariant</comment></data>
   <data name="&gt;&gt;gbWindows.Name" xml:space="preserve">
     <value>gbWindows</value>
   </data>
@@ -811,7 +946,7 @@
     <value>tpIntegration</value>
   </data>
   <data name="&gt;&gt;gbWindows.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>3</value>
   </data>
   <data name="tpIntegration.Location" type="System.Drawing.Point, System.Drawing">
     <value>4, 22</value>
@@ -914,7 +1049,7 @@
   </data>
   <data name="lblPreviewPersonalFolderPath.Text" xml:space="preserve">
     <value>...</value>
-  </data>
+  <comment>@Invariant</comment></data>
   <data name="&gt;&gt;lblPreviewPersonalFolderPath.Name" xml:space="preserve">
     <value>lblPreviewPersonalFolderPath</value>
   </data>
@@ -1157,7 +1292,7 @@
   </data>
   <data name="lblSaveImageSubFolderPatternPreview.Text" xml:space="preserve">
     <value>...</value>
-  </data>
+  <comment>@Invariant</comment></data>
   <data name="&gt;&gt;lblSaveImageSubFolderPatternPreview.Name" xml:space="preserve">
     <value>lblSaveImageSubFolderPatternPreview</value>
   </data>
@@ -1218,6 +1353,30 @@
   <data name="&gt;&gt;tpPaths.ZOrder" xml:space="preserve">
     <value>2</value>
   </data>
+  <data name="btnResetSettings.Location" type="System.Drawing.Point, System.Drawing">
+    <value>16, 160</value>
+  </data>
+  <data name="btnResetSettings.Size" type="System.Drawing.Size, System.Drawing">
+    <value>184, 24</value>
+  </data>
+  <data name="btnResetSettings.TabIndex" type="System.Int32, mscorlib">
+    <value>6</value>
+  </data>
+  <data name="btnResetSettings.Text" xml:space="preserve">
+    <value>Reset settings...</value>
+  </data>
+  <data name="&gt;&gt;btnResetSettings.Name" xml:space="preserve">
+    <value>btnResetSettings</value>
+  </data>
+  <data name="&gt;&gt;btnResetSettings.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;btnResetSettings.Parent" xml:space="preserve">
+    <value>tpExportImport</value>
+  </data>
+  <data name="&gt;&gt;btnResetSettings.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
   <data name="cbExportLogs.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
@@ -1246,7 +1405,7 @@
     <value>tpExportImport</value>
   </data>
   <data name="&gt;&gt;cbExportLogs.ZOrder" xml:space="preserve">
-    <value>0</value>
+    <value>1</value>
   </data>
   <data name="cbExportHistory.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1276,7 +1435,7 @@
     <value>tpExportImport</value>
   </data>
   <data name="&gt;&gt;cbExportHistory.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>2</value>
   </data>
   <data name="cbExportSettings.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1303,13 +1462,13 @@
     <value>tpExportImport</value>
   </data>
   <data name="&gt;&gt;cbExportSettings.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>3</value>
   </data>
   <data name="pbExportImport.Location" type="System.Drawing.Point, System.Drawing">
-    <value>16, 160</value>
+    <value>208, 96</value>
   </data>
   <data name="pbExportImport.Size" type="System.Drawing.Size, System.Drawing">
-    <value>184, 24</value>
+    <value>184, 23</value>
   </data>
   <data name="pbExportImport.TabIndex" type="System.Int32, mscorlib">
     <value>5</value>
@@ -1327,7 +1486,7 @@
     <value>tpExportImport</value>
   </data>
   <data name="&gt;&gt;pbExportImport.ZOrder" xml:space="preserve">
-    <value>3</value>
+    <value>4</value>
   </data>
   <data name="btnExport.Location" type="System.Drawing.Point, System.Drawing">
     <value>16, 96</value>
@@ -1351,7 +1510,7 @@
     <value>tpExportImport</value>
   </data>
   <data name="&gt;&gt;btnExport.ZOrder" xml:space="preserve">
-    <value>4</value>
+    <value>5</value>
   </data>
   <data name="btnImport.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
@@ -1378,7 +1537,7 @@
     <value>tpExportImport</value>
   </data>
   <data name="&gt;&gt;btnImport.ZOrder" xml:space="preserve">
-    <value>5</value>
+    <value>6</value>
   </data>
   <data name="tpExportImport.Location" type="System.Drawing.Point, System.Drawing">
     <value>4, 22</value>

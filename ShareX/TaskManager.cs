@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (c) 2007-2016 ShareX Team
+    Copyright (c) 2007-2017 ShareX Team
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -441,7 +441,7 @@ namespace ShareX
 
                     if (Program.Settings.SaveSettingsAfterTaskCompleted && !IsBusy)
                     {
-                        Program.SaveAllSettingsAsync();
+                        SettingManager.SaveAllSettingsAsync();
                     }
                 }
             }
@@ -471,7 +471,7 @@ namespace ShareX
                 }
             }
 
-            int progress = isWorkingTasks ? ((int)averageProgress).Between(0, 99) : -1;
+            int progress = isWorkingTasks ? (int)averageProgress : -1;
             UpdateTrayIcon(progress);
 
             string title;
@@ -527,6 +527,26 @@ namespace ShareX
 
                 lastIconStatus = progress;
             }
+        }
+
+        public static void TestTrayIcon()
+        {
+            Timer timer = new Timer();
+            timer.Interval = 50;
+            int i = 0;
+            timer.Tick += (sender, e) =>
+            {
+                if (i > 99)
+                {
+                    timer.Stop();
+                    UpdateTrayIcon();
+                }
+                else
+                {
+                    UpdateTrayIcon(i++);
+                }
+            };
+            timer.Start();
         }
 
         public static void AddRecentTasksToMainWindow()
